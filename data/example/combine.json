@@ -1,0 +1,103 @@
+{
+    "assembly": {
+      "components": {
+        "1": {
+          "type": "extruded_sketch",
+          "sketch": {
+            "planes": ["XY"],
+            "contours": [
+              {
+                "type": "rectangle",
+                "center": [0, 0],
+                "width": 10,
+                "height": 6,
+                "fillet": 0.5
+              }
+            ]
+          },
+          "extrusion": {
+            "distance": 2,
+            "direction": [0, 0, 1]
+          },
+          "transform": {
+            "translation": [0, 0, 0],
+            "rotation": [0, 0, 0]
+          }
+        },
+        "2": {
+          "type": "extruded_sketch",
+          "sketch": {
+            "planes": ["XY"],
+            "contours": [
+              {
+                "type": "circle",
+                "center": [0, 0],
+                "radius": 5
+              },
+              {
+                "type": "circle",
+                "center": [0, 0],
+                "radius": 3
+              }
+            ]
+          },
+          "extrusion": {
+            "distance": 8,
+            "direction": [0, 0, 1]
+          },
+          "transform": {
+            "translation": [5, 3, 2],
+            "rotation": [0, 0, 0]
+          }
+        },
+        "3": {
+          "type": "extruded_sketch",
+          "sketch": {
+            "planes": ["XY"],
+            "contours": [
+              {
+                "type": "polyline",
+                "points": [
+                  [0, 0],
+                  [8, 0],
+                  [8, 2],
+                  [2, 2],
+                  [2, 6],
+                  [0, 6]
+                ],
+                "closed": true
+              }
+            ]
+          },
+          "extrusion": {
+            "distance": 1.5,
+            "direction": [0, 0, 1]
+          },
+          "transform": {
+            "translation": [-4, -3, 2],
+            "rotation": [0, 0, 15]
+          }
+        },
+        "4": {
+          "type": "mirror",
+          "source_components": ["2", "3"],
+          "plane": {
+            "origin": [0, 10, 0],
+            "normal": [0, 1, 0]
+          }
+        }
+      },
+      "constraints": [
+        {
+          "type": "concentric",
+          "components": ["2.0", "2.1"],
+          "tolerance": 0.1
+        },
+        {
+          "type": "tangent",
+          "components": ["2", "3"],
+          "contact_point": [8, 2, 0]
+        }
+      ]
+    }
+  }

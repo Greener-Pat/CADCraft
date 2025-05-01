@@ -1,0 +1,22 @@
+{
+    "type": "extruded_sketch",
+    "sketch": {
+      "planes": ["XY"],
+      "contours": [
+        {
+          "type": "circle",
+          "center": [0, 0],
+          "radius": 5
+        },
+        {
+          "type": "circle",
+          "center": [0, 0],
+          "radius": 3
+        }
+      ]
+    },
+    "extrusion": {
+      "distance": 8,
+      "direction": [0, 0, 1]
+    }
+  }

@@ -1,0 +1,24 @@
+{
+    "type": "extruded_sketch",
+    "sketch": {
+      "planes": ["XY"],
+      "contours": [
+        {
+          "type": "polyline",
+          "points": [
+            [0, 0],
+            [8, 0],
+            [8, 2],
+            [2, 2],
+            [2, 6],
+            [0, 6]
+          ],
+          "closed": true
+        }
+      ]
+    },
+    "extrusion": {
+      "distance": 1.5,
+      "direction": [0, 0, 1]
+    }
+  }

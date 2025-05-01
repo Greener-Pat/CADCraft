@@ -1,0 +1,19 @@
+{
+    "type": "extruded_sketch",
+    "sketch": {
+      "planes": ["XY"],
+      "contours": [
+        {
+          "type": "rectangle",
+          "center": [0, 0],
+          "width": 10,
+          "height": 6,
+          "fillet": 0.5
+        }
+      ]
+    },
+    "extrusion": {
+      "distance": 2,
+      "direction": [0, 0, 1]
+    }
+  }
