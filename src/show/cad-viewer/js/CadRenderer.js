@@ -371,36 +371,86 @@ export class CadRenderer {
             this.clearSelection();
         }
     }
-    
-    // 设置拖拽平面
+
+    // 设置拖拽平面 - 优化所有轴向
     setupDragPlane() {
         if (!this.currentAxis || !this.selectedObject) return;
         
-        // 根据当前轴设置平面法线
-        const planeNormal = new THREE.Vector3();
+        // 获取相机和对象位置
+        const cameraPosition = new THREE.Vector3();
+        this.camera.getWorldPosition(cameraPosition);
+        const objectPosition = this.selectedObject.position.clone();
         
+        // 相机到对象的方向向量
+        const viewVector = new THREE.Vector3().subVectors(cameraPosition, objectPosition).normalize();
+        
+        // 设置平面法线
+        let normal = new THREE.Vector3();
+        
+        // 使用统一的方法处理所有轴向
         if (this.currentAxis === 'x') {
-            planeNormal.set(1, 0, 0); // YZ平面
-        } else if (this.currentAxis === 'y') {
-            planeNormal.set(0, 1, 0); // XZ平面
-        } else if (this.currentAxis === 'z') {
-            planeNormal.set(0, 0, 1); // XY平面
+            // 创建一个垂直于X轴和相机视线的平面
+            // 首先与X轴叉乘得到垂直于X轴的向量
+            const perpToX = new THREE.Vector3().crossVectors(new THREE.Vector3(1, 0, 0), viewVector).normalize();
+            
+            // 再次叉乘得到同时垂直于X轴和第一个向量的法线
+            normal.crossVectors(new THREE.Vector3(1, 0, 0), perpToX).normalize();
+            
+            // 确保法线有足够的X分量
+            if (Math.abs(normal.x) < 0.3) {
+                normal.x += normal.x < 0 ? -0.3 : 0.3;
+                normal.normalize();
+            }
+        } 
+        else if (this.currentAxis === 'y') {
+            // 创建一个垂直于Y轴和相机视线的平面
+            // 首先与Y轴叉乘得到垂直于Y轴的向量
+            const perpToY = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), viewVector).normalize();
+            
+            // 再次叉乘得到同时垂直于Y轴和第一个向量的法线
+            normal.crossVectors(new THREE.Vector3(0, 1, 0), perpToY).normalize();
+            
+            // 确保法线有足够的Y分量
+            if (Math.abs(normal.y) < 0.3) {
+                normal.y += normal.y < 0 ? -0.3 : 0.3;
+                normal.normalize();
+            }
+        } 
+        else if (this.currentAxis === 'z') {
+            // 创建一个垂直于Z轴和相机视线的平面
+            // 首先与Z轴叉乘得到垂直于Z轴的向量
+            const perpToZ = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 0, 1), viewVector).normalize();
+            
+            // 再次叉乘得到同时垂直于Z轴和第一个向量的法线
+            normal.crossVectors(new THREE.Vector3(0, 0, 1), perpToZ).normalize();
+            
+            // 确保法线有足够的Z分量
+            if (Math.abs(normal.z) < 0.3) {
+                normal.z += normal.z < 0 ? -0.3 : 0.3;
+                normal.normalize();
+            }
         }
         
-        // 从相机到对象的方向
-        const cameraDir = new THREE.Vector3();
-        this.camera.getWorldDirection(cameraDir);
+        // 调整法线方向，避免与视线几乎平行
+        const dotWithView = normal.dot(viewVector);
+        if (Math.abs(dotWithView) > 0.9) {
+            // 如果法线与视线几乎平行，添加垂直分量
+            normal.add(new THREE.Vector3(
+                this.currentAxis !== 'x' ? 0.5 : 0,
+                this.currentAxis !== 'y' ? 0.5 : 0,
+                this.currentAxis !== 'z' ? 0.5 : 0
+            )).normalize();
+        }
         
-        // 确保平面朝向相机
-        if (planeNormal.dot(cameraDir) > 0) {
-            planeNormal.negate();
+        // 确保法线朝向相机
+        if (normal.dot(viewVector) < 0) {
+            normal.negate();
         }
         
         // 设置拖拽平面
-        this.dragPlane.setFromNormalAndCoplanarPoint(
-            planeNormal,
-            this.selectedObject.position
-        );
+        this.dragPlane.setFromNormalAndCoplanarPoint(normal, objectPosition);
+        
+        console.log(`创建${this.currentAxis}轴拖拽平面，法线:`, normal, "点积:", normal.dot(viewVector));
     }
     
     // 鼠标移动事件处理
