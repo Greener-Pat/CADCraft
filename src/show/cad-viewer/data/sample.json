@@ -1,0 +1,94 @@
+{
+    "assembly": {
+        "components": {
+            "1": {
+                "type": "extruded_sketch",
+                "sketch": {
+                    "planes": ["XY"],
+                    "contours": [
+                        {
+                            "type": "rectangle",
+                            "center": [0, 0],
+                            "width": 10,
+                            "height": 6,
+                            "fillet": 0.8
+                        }
+                    ]
+                },
+                "extrusion": {
+                    "distance": 2,
+                    "direction": [0, 0, 1]
+                },
+                "transform": {
+                    "translation": [0, 0, 0],
+                    "rotation": [0, 0, 0]
+                }
+            },
+            "2": {
+                "type": "extruded_sketch",
+                "sketch": {
+                    "planes": ["XY"],
+                    "contours": [
+                        {
+                            "type": "circle",
+                            "center": [0, 0],
+                            "radius": 2.5
+                        }
+                    ]
+                },
+                "extrusion": {
+                    "distance": 4,
+                    "direction": [0, 0, 1]
+                },
+                "transform": {
+                    "translation": [0, 0, 2],
+                    "rotation": [0, 0, 0]
+                }
+            },
+            "3": {
+                "type": "extruded_sketch",
+                "sketch": {
+                    "planes": ["XY"],
+                    "contours": [
+                        {
+                            "type": "rectangle",
+                            "center": [7, 0],
+                            "width": 2,
+                            "height": 8
+                        }
+                    ]
+                },
+                "extrusion": {
+                    "distance": 1,
+                    "direction": [0, 0, 1]
+                },
+                "transform": {
+                    "translation": [0, 0, 1],
+                    "rotation": [0, 0, 0]
+                }
+            },
+            "4": {
+                "type": "extruded_sketch",
+                "sketch": {
+                    "planes": ["XY"],
+                    "contours": [
+                        {
+                            "type": "rectangle",
+                            "center": [-7, 0],
+                            "width": 2,
+                            "height": 8
+                        }
+                    ]
+                },
+                "extrusion": {
+                    "distance": 1,
+                    "direction": [0, 0, 1]
+                },
+                "transform": {
+                    "translation": [0, 0, 1],
+                    "rotation": [0, 0, 0]
+                }
+            }
+        }
+    }
+}

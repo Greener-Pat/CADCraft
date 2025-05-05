@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAD 可视化工具</title>
+    <!-- 防止缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- 引入字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 导入自定义样式 -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- 导入模块映射 -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.153.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
+        }
+    }
+    </script>
+    <!-- 距离标签样式 -->
+    <style>
+        .distance-label {
+            display: none;
+            position: absolute;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-cube"></i>
+            <h1>CAD Viewer</h1>
+        </div>
+        <div class="navbar-controls">
+            <button id="themeToggle" class="icon-button" title="切换主题">
+                <i class="fa-solid fa-circle-half-stroke"></i>
+            </button>
+            <span class="user-info">
+                <i class="fa-solid fa-user"></i>
+                <span id="username">eFlerin</span>
+            </span>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 - 使用Flexbox确保正确排列 -->
+    <div class="app-container">
+        <!-- 渲染区域 - 左侧 -->
+        <main class="viewer-container">
+            <div id="container"></div>
+            
+            <!-- 状态条 -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <i class="fa-solid fa-circle-info"></i>
+                    状态: <span id="statusText">准备就绪</span>
+                </div>
+                <div class="status-item">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="currentTime">2025-05-05 14:32:40</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- 右侧控制面板 -->
+        <aside class="sidebar right">
+            <!-- 文件操作区块 - 可折叠功能 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>文件操作</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="file-controls">
+                        <input type="file" id="fileInput" accept=".json" style="display:none">
+                        <button id="loadJsonBtn" class="action-button primary">
+                            <i class="fa-solid fa-file-import"></i>
+                            加载JSON文件
+                        </button>
+                        <button id="loadSampleBtn" class="action-button secondary">
+                            <i class="fa-solid fa-shapes"></i>
+                            加载示例模型
+                        </button>
+                        <!-- 下载按钮 -->
+                        <button id="downloadModelBtn" class="action-button success">
+                            <i class="fa-solid fa-download"></i>
+                            下载当前模型
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 拖拽设置区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>边界设置</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="drag-limits-controls">
+                        <div class="control-group">
+                            <div class="control-label">水平范围</div>
+                            <div class="range-control">
+                                <label>
+                                    大小:
+                                    <input type="number" id="gridSizeInput" min="10" max="100" value="20" step="5">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-label">垂直范围</div>
+                            <div class="range-control">
+                                <label>
+                                    最小值:
+                                    <input type="number" id="verticalMinInput" min="0" max="50" value="0" step="1">
+                                </label>
+                                <label>
+                                    最大值:
+                                    <input type="number" id="verticalMaxInput" min="1" max="50" value="10" step="1">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="control-option">
+                            <label for="boundingBoxToggle">
+                                <i class="fa-solid fa-border-all"></i>
+                                显示边界框
+                            </label>
+                            <label class="switch">
+                                <input type="checkbox" id="boundingBoxToggle" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 基本模型区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>基本模型</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="basic-shapes">
+                        <div class="shape-grid">
+                            <div class="shape-item" data-shape="box">
+                                <div class="shape-preview box-preview"></div>
+                                <span>长方体</span>
+                            </div>
+                            <div class="shape-item" data-shape="sphere">
+                                <div class="shape-preview sphere-preview"></div>
+                                <span>球体</span>
+                            </div>
+                            <div class="shape-item" data-shape="cylinder">
+                                <div class="shape-preview cylinder-preview"></div>
+                                <span>圆柱体</span>
+                            </div>
+                            <div class="shape-item" data-shape="cone">
+                                <div class="shape-preview cone-preview"></div>
+                                <span>圆锥体</span>
+                            </div>
+                            <div class="shape-item" data-shape="torus">
+                                <div class="shape-preview torus-preview"></div>
+                                <span>圆环</span>
+                            </div>
+                            <div class="shape-item" data-shape="pyramid">
+                                <div class="shape-preview pyramid-preview"></div>
+                                <span>金字塔</span>
+                            </div>
+                        </div>
+                        <div class="shape-controls">
+                            <button id="addShapeBtn" class="action-button primary" disabled>
+                                <i class="fa-solid fa-plus"></i>
+                                添加到场景
+                            </button>
+                        </div>
+                        <div class="drag-tip">
+                            <i class="fa-solid fa-hand-pointer"></i>
+                            提示：点击模型可显示控制手柄，拖拽手柄移动
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 视图控制区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>视图控制</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <button id="resetBtn" class="action-button">
+                        <i class="fa-solid fa-camera-rotate"></i>
+                        重置视图
+                    </button>
+                    <div class="control-option">
+                        <label for="wireframeToggle">
+                            <i class="fa-solid fa-vector-square"></i>
+                            线框模式
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="wireframeToggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="control-option">
+                        <label for="axesToggle">
+                            <i class="fa-solid fa-arrows-to-dot"></i>
+                            显示坐标轴
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="axesToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="control-option">
+                        <label for="shadowToggle">
+                            <i class="fa-solid fa-moon"></i>
+                            显示阴影
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="shadowToggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模型信息区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>模型信息</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div id="modelInfo">
+                        <p>未加载模型</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用指南区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>使用指南</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <ul class="guide-list">
+                        <li><i class="fa-solid fa-computer-mouse"></i> 鼠标左键旋转</li>
+                        <li><i class="fa-solid fa-hand"></i> 鼠标右键平移</li>
+                        <li><i class="fa-solid fa-up-down"></i> 鼠标滚轮缩放</li>
+                        <li><i class="fa-solid fa-arrow-pointer"></i> 点击选择对象</li>
+                        <li><i class="fa-solid fa-arrows-left-right-to-line"></i> 拖拽红色箭头沿X轴移动</li>
+                        <li><i class="fa-solid fa-arrows-up-down"></i> 拖拽绿色箭头沿Y轴移动</li>
+                        <li><i class="fa-solid fa-arrows-left-right"></i> 拖拽蓝色箭头沿Z轴移动</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loader"></div>
+        <p id="loadingText">加载中...</p>
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+    </div>
+    
+    <!-- 主入口脚本 -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
