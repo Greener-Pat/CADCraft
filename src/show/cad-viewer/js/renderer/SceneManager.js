@@ -69,6 +69,12 @@ export class SceneManager {
         if (this.threeRenderer && this.scene && this.camera) {
             this.threeRenderer.render(this.scene, this.camera);
         }
+
+        // 添加这段: 更新Gizmo位置和可见性
+        const selectedObject = this.renderer.selectionManager.getSelectedObject();
+        if (selectedObject && this.renderer.controlsManager.gizmo) {
+            this.renderer.controlsManager.updateGizmoPosition(selectedObject);
+        }
     }
     
     // 添加灯光
@@ -255,17 +261,33 @@ export class SceneManager {
         return mesh;
     }
     
-    // 渲染JSON数据
+    // 渲染JSON数据 - 支持标准格式和B-rep格式
     renderFromJson(data) {
         updateStatus('清除现有模型，开始渲染');
+        this.clearCADObjects();
         
-        // 检查数据格式
-        if (!data.assembly || !data.assembly.components) {
-            updateStatus('无效的CAD JSON格式');
-            alert('无效的CAD JSON格式！缺少assembly或components字段。');
+        // 检测JSON格式
+        if (data.assembly && data.assembly.components) {
+            // 标准格式
+            this.renderStandardFormat(data);
+        } else if (data.parts || data.final_name) {
+            // B-rep格式
+            this.renderBRepFormat(data);
+        } else {
+            updateStatus('无法识别的JSON格式');
+            alert('无法识别的JSON格式！无法确定模型类型。');
             return;
         }
         
+        // 重置视图
+        this.resetView();
+        
+        updateStatus('CAD模型渲染完成');
+        console.log('已生成的CAD对象:', this.cadObjects.length);
+    }
+    
+    // 处理标准格式
+    renderStandardFormat(data) {
         const components = data.assembly.components;
         
         // 处理每个组件
@@ -280,12 +302,6 @@ export class SceneManager {
                 updateStatus(`不支持的组件类型: ${component.type}`);
             }
         });
-        
-        // 重置视图
-        this.resetView();
-        
-        updateStatus('CAD模型渲染完成');
-        console.log('已生成的CAD对象:', this.cadObjects.length);
     }
     
     // 处理挤压草图
@@ -343,6 +359,115 @@ export class SceneManager {
                 updateStatus(`添加了${contour.type}组件`);
             }
         });
+    }
+    
+    // 处理B-rep格式 - 新增方法
+    renderBRepFormat(data) {
+        const modelName = data.final_name || "未命名模型";
+        updateStatus(`正在处理B-rep模型: ${modelName}`);
+        
+        // 遍历所有部件
+        const parts = data.parts || {};
+        let partIndex = 0;
+        
+        for (const partKey in parts) {
+            partIndex++;
+            const part = parts[partKey];
+            
+            updateStatus(`处理部件 ${partIndex}/${Object.keys(parts).length}: ${partKey}`);
+            
+            // 处理坐标系
+            const coordSystem = part.coordinate_system || {};
+            const transform = {
+                rotation: coordSystem["Euler Angles"] || [0, 0, 0],
+                translation: coordSystem["Translation Vector"] || [0, 0, 0]
+            };
+            
+            // 处理部件中的所有面
+            if (part.sketch) {
+                this.processBRepSketch(part.sketch, part.extrusion, transform, partKey);
+            }
+        }
+    }
+    
+    // 处理B-rep格式的草图 - 更强的位置调整
+    processBRepSketch(sketch, extrusion, transform, componentId) {
+        // 创建部件网格
+        let mesh;
+        try {
+            // 使用GeometryFactory中的新方法处理B-rep数据
+            mesh = this.geometryFactory.createFromBRep(sketch, extrusion);
+            
+            if (!mesh) {
+                console.warn('无法从B-rep数据创建模型');
+                updateStatus('无法从B-rep数据创建模型');
+                return;
+            }
+            
+            // 创建随机颜色
+            const color = new THREE.Color(
+                0.3 + Math.random() * 0.4,
+                0.3 + Math.random() * 0.4,
+                0.3 + Math.random() * 0.4
+            );
+            
+            // 处理颜色 - 检查是否为组
+            if (mesh.isGroup) {
+                // 对组中的每个子对象应用颜色
+                mesh.children.forEach(child => {
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(m => m.color = color);
+                        } else {
+                            child.material.color = color;
+                        }
+                    }
+                });
+            } else {
+                // 单个对象
+                if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(m => m.color = color);
+                } else if (mesh.material) {
+                    mesh.material.color = color;
+                }
+            }
+            
+            // 保存组件ID和其他数据
+            mesh.userData.componentId = componentId;
+            mesh.userData.type = 'brep';
+            
+            // 应用变换
+            this.applyTransform(mesh, transform);
+            
+            // 添加全局比例因子 - 调整模型大小
+            const globalScale = 10.0; // 调整此值可放大或缩小模型
+            mesh.scale.set(globalScale, globalScale, globalScale);
+            
+            // 计算模型的包围盒，用于确定底部位置
+            let boundingBox = new THREE.Box3().setFromObject(mesh);
+            let modelHeight = boundingBox.max.y - boundingBox.min.y;
+            
+            // 强制提升模型到栅格上方 - 使用更大的偏移量
+            // 如果模型底部在 y=0 下方，则将其提升
+            if (boundingBox.min.y <= 0) {
+                // 移动模型使其底部位于 y=1 (确保在栅格之上)
+                const yOffset = Math.abs(boundingBox.min.y) + 1;
+                console.log(`模型底部在 ${boundingBox.min.y}，提升 ${yOffset} 单位`);
+                mesh.position.y += yOffset;
+            } else {
+                // 即使已在栅格上方，也添加一些额外提升
+                mesh.position.y += 1;
+                console.log(`模型已在栅格上方 (${boundingBox.min.y})，添加额外提升`);
+            }
+            
+            // 添加到场景
+            this.addObjectToScene(mesh);
+            
+            updateStatus(`添加了B-rep模型: ${componentId}`);
+        } catch (error) {
+            console.error('处理B-rep模型出错:', error);
+            updateStatus(`处理B-rep模型出错: ${error.message}`);
+        }
     }
     
     // 应用变换

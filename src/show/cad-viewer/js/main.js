@@ -15,7 +15,7 @@ async function initApp() {
     
     
     // 设置当前时间和用户名
-    document.getElementById('currentTime').textContent = '2025-05-05 14:32:40';
+    document.getElementById('currentTime').textContent = '2025-05-06 12:12:40';
     document.getElementById('username').textContent = 'eFlerin';
     
     // 创建CAD渲染器实例
@@ -115,11 +115,24 @@ async function initApp() {
 
 // 处理对象被移动事件
 function handleObjectMoved(componentId, newPosition) {
-    if (!currentModelData || !componentId) return;
+    if (!currentModelData) return;
+    
+    // 检测是标准格式还是B-rep格式
+    if (currentModelData.assembly && currentModelData.assembly.components) {
+        // 标准格式
+        handleStandardModelMoved(componentId, newPosition);
+    } else if (currentModelData.parts) {
+        // B-rep格式
+        handleBRepModelMoved(componentId, newPosition);
+    }
+}
+
+// 处理标准格式模型的移动
+function handleStandardModelMoved(componentId, newPosition) {
+    if (!currentModelData.assembly.components[componentId]) return;
     
     // 获取组件数据
     const component = currentModelData.assembly.components[componentId];
-    if (!component) return;
     
     // 更新组件的变换数据
     if (!component.transform) {
@@ -140,6 +153,43 @@ function handleObjectMoved(componentId, newPosition) {
     updateModelInfo(currentModelData);
     
     updateStatus(`更新了组件 ${componentId} 的位置`);
+}
+
+// 处理B-rep格式模型的移动
+function handleBRepModelMoved(componentId, newPosition) {
+    // 在B-rep中查找部件
+    const parts = currentModelData.parts;
+    let found = false;
+    
+    for (const partKey in parts) {
+        if (partKey === componentId) {
+            const part = parts[partKey];
+            
+            // 确保存在坐标系统
+            if (!part.coordinate_system) {
+                part.coordinate_system = {
+                    "Euler Angles": [0, 0, 0],
+                    "Translation Vector": [0, 0, 0]
+                };
+            }
+            
+            // 更新平移向量
+            part.coordinate_system["Translation Vector"] = [
+                newPosition.x,
+                newPosition.y,
+                newPosition.z
+            ];
+            
+            found = true;
+            break;
+        }
+    }
+    
+    if (found) {
+        // 更新模型信息显示
+        updateBRepModelInfo(currentModelData);
+        updateStatus(`更新了B-rep部件 ${componentId} 的位置`);
+    }
 }
 
 // 初始化区块折叠功能
@@ -312,6 +362,13 @@ function mergeShapeIntoCurrentModel(shapeData) {
                 components: {}
             }
         };
+    } else if (!currentModelData.assembly) {
+        // 如果是B-rep格式，转换为标准格式
+        currentModelData = {
+            assembly: {
+                components: {}
+            }
+        };
     }
     
     // 添加新组件到当前模型
@@ -340,7 +397,17 @@ function downloadCurrentModel() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `cad-model-${Date.now()}.json`;
+        
+        // 生成文件名：检测模型类型
+        let fileName;
+        if (currentModelData.final_name) {
+            // B-rep格式
+            fileName = `${currentModelData.final_name.replace(/\s+/g, '-')}-${Date.now()}.json`;
+        } else {
+            // 标准格式
+            fileName = `cad-model-${Date.now()}.json`;
+        }
+        a.download = fileName;
         
         // 模拟点击下载
         document.body.appendChild(a);
@@ -391,9 +458,16 @@ async function loadSampleModel() {
     }
 }
 
-// 更新模型信息
+// 更新模型信息 - 处理标准格式
 function updateModelInfo(data) {
     const modelInfoElement = document.getElementById('modelInfo');
+    
+    // 检测是否为B-rep格式
+    if (data.final_name || data.parts) {
+        updateBRepModelInfo(data);
+        return;
+    }
+    
     if (!data || !data.assembly || !data.assembly.components) {
         modelInfoElement.innerHTML = '<p>无效模型数据</p>';
         return;
@@ -403,6 +477,9 @@ function updateModelInfo(data) {
     const componentCount = Object.keys(components).length;
     
     let html = `
+        <div class="model-info-item">
+            <strong>模型类型:</strong> 标准CAD格式
+        </div>
         <div class="model-info-item">
             <strong>组件数量:</strong> ${componentCount}
         </div>
@@ -449,7 +526,102 @@ function updateModelInfo(data) {
     modelInfoElement.innerHTML = html;
 }
 
-// 处理文件上传
+// 更新B-rep模型信息
+function updateBRepModelInfo(data) {
+    const modelInfoElement = document.getElementById('modelInfo');
+    
+    // 检查B-rep数据是否有效
+    if (!data || (!data.parts && !data.final_name)) {
+        modelInfoElement.innerHTML = '<p>无效的B-rep模型数据</p>';
+        return;
+    }
+    
+    // 获取模型名称和描述
+    const modelName = data.final_name || "未命名模型";
+    const modelShape = data.final_shape || "";
+    
+    // 获取部件数量
+    const parts = data.parts || {};
+    const partsCount = Object.keys(parts).length;
+    
+    let html = `
+        <div class="model-info-item">
+            <strong>模型类型:</strong> B-rep格式
+        </div>
+        <div class="model-info-item">
+            <strong>模型名称:</strong> ${modelName}
+        </div>
+    `;
+    
+    if (modelShape) {
+        html += `
+            <div class="model-info-item">
+                <strong>模型描述:</strong> ${modelShape}
+            </div>
+        `;
+    }
+    
+    html += `
+        <div class="model-info-item">
+            <strong>部件数量:</strong> ${partsCount}
+        </div>
+    `;
+    
+    // 分析面和轮廓
+    let faceCount = 0;
+    let loopCount = 0;
+    let lineCount = 0;
+    let arcCount = 0;
+    
+    // 遍历所有部件
+    for (const partKey in parts) {
+        const part = parts[partKey];
+        if (part.sketch) {
+            // 计算面数量
+            const faces = Object.keys(part.sketch).filter(key => key.startsWith('face_'));
+            faceCount += faces.length;
+            
+            // 计算循环和边数量
+            faces.forEach(faceKey => {
+                const face = part.sketch[faceKey];
+                const loops = Object.keys(face).filter(key => key.startsWith('loop_'));
+                loopCount += loops.length;
+                
+                loops.forEach(loopKey => {
+                    const loop = face[loopKey];
+                    lineCount += Object.keys(loop).filter(key => key.startsWith('line_')).length;
+                    arcCount += Object.keys(loop).filter(key => key.startsWith('arc_')).length;
+                });
+            });
+        }
+    }
+    
+    html += `
+        <div class="model-info-item">
+            <strong>几何详情:</strong>
+            <ul>
+                <li>面: ${faceCount}</li>
+                <li>环: ${loopCount}</li>
+                <li>线段: ${lineCount}</li>
+                <li>弧线: ${arcCount}</li>
+            </ul>
+        </div>
+    `;
+    
+    // 添加模型大小信息
+    const jsonSize = JSON.stringify(data).length;
+    const formattedSize = formatSize(jsonSize);
+    
+    html += `
+        <div class="model-info-item">
+            <strong>模型大小:</strong> ${formattedSize}
+        </div>
+    `;
+    
+    modelInfoElement.innerHTML = html;
+}
+
+// 处理文件上传 - 支持标准格式和B-rep格式
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -463,21 +635,35 @@ function handleFileUpload(event) {
         updateProgress(50);
         try {
             const data = JSON.parse(e.target.result);
-            updateStatus('正在渲染CAD模型');
+            updateStatus('正在解析模型格式');
+            updateProgress(60);
+            
+            // 检测JSON格式类型
+            let modelType = "未知";
+            if (data.assembly && data.assembly.components) {
+                modelType = "标准CAD格式";
+            } else if (data.parts || data.final_name) {
+                modelType = "B-rep格式";
+            } else {
+                throw new Error("无法识别的模型格式");
+            }
+            
+            updateStatus(`正在渲染${modelType}模型`);
             updateProgress(70);
             
-            currentModelData = data; // 保存模型数据
+            // 保存模型数据并渲染
+            currentModelData = data;
             renderer.renderCADFromJson(data);
             
-            // 更新模型信息
+            // 更新模型信息 - 会自动判断格式
             updateModelInfo(data);
             
             updateProgress(100);
-            updateStatus('模型加载完成，点击模型查看控制手柄');
+            updateStatus(`${modelType}模型加载完成，点击模型查看控制手柄`);
             setTimeout(hideLoading, 500);
         } catch (error) {
-            updateStatus('JSON解析错误: ' + error.message);
-            alert('JSON解析错误: ' + error.message);
+            updateStatus('模型解析错误: ' + error.message);
+            alert('模型解析错误: ' + error.message);
             hideLoading();
         }
     };

@@ -104,4 +104,21 @@ export class CadRenderer {
     addShapeToScene(mesh, componentId) {
         return this.sceneManager.addObjectToScene(mesh, componentId);
     }
+
+    /**
+     * 渲染B-rep格式的CAD模型
+     * @param {Object} data - B-rep格式的JSON对象
+     */
+    renderBRepModel(data) {
+        try {
+            // 直接使用SceneManager来处理B-rep格式
+            this.sceneManager.renderFromJson(data);
+            console.log('B-rep模型渲染成功');
+            return true;
+        } catch (error) {
+            console.error('B-rep模型渲染失败:', error);
+            updateStatus('B-rep模型渲染失败: ' + error.message);
+            return false;
+        }
+    }
 }
