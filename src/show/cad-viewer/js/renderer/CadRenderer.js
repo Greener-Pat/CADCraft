@@ -1,0 +1,107 @@
+import { SceneManager } from './SceneManager.js';
+import { ControlsManager } from './ControlsManager.js';
+import { SelectionManager } from './SelectionManager.js';
+import { EventHandler } from './EventHandler.js';
+
+export class CadRenderer {
+    constructor(containerId) {
+        this.containerId = containerId;
+        this.container = document.getElementById(containerId);
+        
+        // 初始化各个管理器
+        this.sceneManager = new SceneManager(this);
+        this.controlsManager = new ControlsManager(this);
+        this.selectionManager = new SelectionManager(this);
+        this.eventHandler = new EventHandler(this);
+        
+        // 配置属性和限制
+        this.gridConfig = {
+            size: 20,
+            divisions: 20,
+            mainColor: 0x888888,
+            secondaryColor: 0xcccccc
+        };
+        
+        this.dragLimits = {
+            horizontal: { min: -this.gridConfig.size/2, max: this.gridConfig.size/2 },
+            vertical: { min: 0, max: 10 }
+        };
+    }
+    
+    // 初始化方法，协调各模块的初始化
+    async init() {
+        // 初始化场景、相机、渲染器
+        await this.sceneManager.init();
+        
+        // 初始化控制手柄
+        this.controlsManager.init();
+        
+        // 设置事件监听器
+        this.eventHandler.setupEventListeners();
+        
+        // 启动渲染循环
+        this.animate();
+        
+        return this;
+    }
+    
+    // 动画循环
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        this.sceneManager.update();
+        this.sceneManager.render();
+    }
+    
+    // 设置对象移动回调
+    setObjectMovedCallback(callback) {
+        this.onObjectMovedCallback = callback;
+    }
+    
+    // 通知对象被移动
+    notifyObjectMoved(object) {
+        if (this.onObjectMovedCallback && object.userData.componentId) {
+            this.onObjectMovedCallback(object.userData.componentId, object.position);
+        }
+    }
+    
+    // 处理窗口大小变化
+    onWindowResize() {
+        this.sceneManager.updateSize();
+    }
+    
+    // 公共接口方法
+    resetView() { this.sceneManager.resetView(); }
+    toggleWireframe(enabled) { this.sceneManager.toggleWireframe(enabled); }
+    toggleAxes(enabled) { this.sceneManager.toggleAxes(enabled); }
+    toggleShadows(enabled) { this.sceneManager.toggleShadows(enabled); }
+    toggleBoundingBox(enabled) { this.sceneManager.toggleBoundingBox(enabled); }
+    
+    // 设置配置
+    setGridConfig(config) {
+        Object.assign(this.gridConfig, config);
+        this.sceneManager.updateGrid();
+    }
+    
+    setDragLimits(limits) {
+        if (limits.horizontal) Object.assign(this.dragLimits.horizontal, limits.horizontal);
+        if (limits.vertical) Object.assign(this.dragLimits.vertical, limits.vertical);
+        this.sceneManager.updateBoundingBox();
+    }
+    
+    // 渲染CAD模型
+    renderCADFromJson(data) {
+        // 清除当前选择
+        this.selectionManager.clearSelection();
+        
+        // 清除现有对象
+        this.sceneManager.clearCADObjects();
+        
+        // 处理新数据
+        this.sceneManager.renderFromJson(data);
+    }
+    
+    // 添加形状到场景
+    addShapeToScene(mesh, componentId) {
+        return this.sceneManager.addObjectToScene(mesh, componentId);
+    }
+}

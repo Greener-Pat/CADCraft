@@ -1,6 +1,7 @@
-import { CadRenderer } from './CadRenderer.js';
-import { ShapeFactory } from './ShapeFactory.js';
-import { updateStatus, showLoading, hideLoading, updateProgress, toggleTheme, loadThemePreference } from './utils.js';
+import { CadRenderer } from './renderer/CadRenderer.js';
+import { updateStatus, showLoading, hideLoading, updateProgress } from './utils/StatusManager.js';
+import { toggleTheme, loadThemePreference, saveSectionState, loadSectionStates, formatSize, getShapeName } from './utils/Utils.js';
+import { ShapeFactory } from './renderer/ShapeFactory.js';
 
 // 全局变量
 let renderer;
@@ -12,8 +13,6 @@ async function initApp() {
     console.log('初始化应用');
     updateStatus('初始化应用');
     
-    // 加载主题首选项
-    loadThemePreference();
     
     // 设置当前时间和用户名
     document.getElementById('currentTime').textContent = '2025-05-05 14:32:40';
@@ -24,6 +23,12 @@ async function initApp() {
     
     // 设置对象移动回调
     renderer.setObjectMovedCallback(handleObjectMoved);
+    
+    // 将渲染器保存到全局变量，以便主题管理工具能够访问
+    window.renderer = renderer;
+    
+    // 加载主题首选项
+    loadThemePreference();
     
     // 添加事件监听器 - 文件操作
     document.getElementById('loadJsonBtn').addEventListener('click', () => {
@@ -157,26 +162,6 @@ function initSectionToggle() {
     loadSectionStates();
 }
 
-// 保存区块折叠状态
-function saveSectionState(sectionId, isCollapsed) {
-    const states = JSON.parse(localStorage.getItem('sectionStates') || '{}');
-    states[sectionId] = isCollapsed;
-    localStorage.setItem('sectionStates', JSON.stringify(states));
-}
-
-// 加载已保存的区块折叠状态
-function loadSectionStates() {
-    const states = JSON.parse(localStorage.getItem('sectionStates') || '{}');
-    const sections = document.querySelectorAll('.sidebar-section');
-    
-    sections.forEach(section => {
-        const title = section.querySelector('h3').textContent.trim();
-        if (states[title]) {
-            section.classList.add('collapsed');
-        }
-    });
-}
-
 // 初始化形状选择器
 function initShapeSelectors() {
     const shapeItems = document.querySelectorAll('.shape-item');
@@ -220,19 +205,6 @@ function addSelectedShapeToScene() {
         
         updateStatus(`已添加${getShapeName(selectedShape)}到场景，点击选择并拖拽箭头移动`);
     }
-}
-
-// 获取形状的中文名称
-function getShapeName(shapeType) {
-    const shapeNames = {
-        'box': '长方体',
-        'sphere': '球体',
-        'cylinder': '圆柱体',
-        'cone': '圆锥体',
-        'torus': '圆环',
-        'pyramid': '金字塔'
-    };
-    return shapeNames[shapeType] || shapeType;
 }
 
 // 将形状转换为CAD模型数据
@@ -475,13 +447,6 @@ function updateModelInfo(data) {
     `;
     
     modelInfoElement.innerHTML = html;
-}
-
-// 格式化文件大小显示
-function formatSize(bytes) {
-    if (bytes < 1024) return bytes + " 字节";
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
-    else return (bytes / 1048576).toFixed(2) + " MB";
 }
 
 // 处理文件上传
