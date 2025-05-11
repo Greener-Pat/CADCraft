@@ -54,7 +54,7 @@ export class SceneManager {
         this.scene.add(this.axesHelper);
         
         // 添加测试立方体
-        this.addDebugCube();
+        // this.addDebugCube();
         
         updateStatus('场景初始化完成');
     }

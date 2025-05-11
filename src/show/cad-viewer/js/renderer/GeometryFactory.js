@@ -149,7 +149,7 @@ export class GeometryFactory {
         }
     }
     
-    // 从复杂草图创建几何体 - 完整修复版本 (支持圆形)
+    // 从复杂草图创建几何体 - 修复挖空问题
     createFromComplexSketch(sketchData, extrusion) {
         // 调试输出
         console.log('处理复杂草图:', { sketchData, extrusion });
@@ -163,109 +163,60 @@ export class GeometryFactory {
             for (const faceKey in sketchData) {
                 const face = sketchData[faceKey];
                 
-                // 处理面中的每个环
-                for (const loopKey in face) {
-                    const loop = face[loopKey];
-                    
-                    // 检查环是否为空
-                    if (Object.keys(loop).length === 0) {
-                        console.warn(`跳过空环: ${faceKey}.${loopKey}`);
-                        continue;
-                    }
-                    
-                    // 特殊处理: 检查是否有circle元素
-                    let hasCircle = false;
-                    for (const elementKey in loop) {
-                        if (elementKey.startsWith('circle_')) {
-                            console.log('发现圆形元素:', elementKey, loop[elementKey]);
-                            hasCircle = true;
-                            
-                            // 创建圆形形状
-                            const circle = loop[elementKey];
-                            const shape = new THREE.Shape();
-                            const center = circle['Center'];
-                            const radius = circle['Radius'];
-                            
-                            if (center && radius) {
-                                // 创建一个完整的圆形
-                                shape.absarc(center[0], center[1], radius, 0, Math.PI * 2, false);
-                                
-                                // 创建挤压设置
-                                const extrudeSettings = {
-                                    steps: 1,
-                                    depth: extrusion.extrude_depth_towards_normal || 1,
-                                    bevelEnabled: false
-                                };
-                                
-                                try {
-                                    // 创建几何体和材质
-                                    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-                                    const material = new THREE.MeshPhongMaterial({ 
-                                        color: 0xB0C4DE,
-                                        shininess: 100 
-                                    });
-                                    
-                                    // 应用缩放因子
-                                    if (extrusion.sketch_scale && extrusion.sketch_scale !== 1) {
-                                        const scaleFactor = extrusion.sketch_scale;
-                                        
-                                        // 使用矩阵缩放几何体
-                                        const scaleMatrix = new THREE.Matrix4().makeScale(
-                                            scaleFactor, 
-                                            scaleFactor, 
-                                            1
-                                        );
-                                        
-                                        geometry.applyMatrix4(scaleMatrix);
-                                        
-                                        console.log(`应用缩放因子: ${scaleFactor}`);
-                                    }
-                                    
-                                    // 旋转几何体使其垂直于XZ平面
-                                    geometry.rotateX(Math.PI / 2);
-                                    
-                                    // 创建网格并添加到组
-                                    const mesh = new THREE.Mesh(geometry, material);
-                                    group.add(mesh);
-                                    
-                                    console.log('成功创建圆柱体');
-                                } catch (error) {
-                                    console.error('创建圆形几何体失败:', error);
-                                }
-                            } else {
-                                console.warn('圆形元素缺少中心或半径');
-                            }
-                            
-                            // 由于已处理圆形，不需要继续处理其他边
-                            break;
-                        }
-                    }
-                    
-                    // 如果已处理圆形，则跳过线段和弧线处理
-                    if (hasCircle) {
-                        continue;
-                    }
-                    
-                    // 创建新形状
-                    const shape = new THREE.Shape();
-                    
-                    // 提取环的所有边
-                    const edges = [];
-                    for (const edgeKey in loop) {
-                        const edge = loop[edgeKey];
+                // 外部主边界形状
+                let mainShape = null;
+                // 孔洞数组
+                const holes = [];
+                
+                // 首先遍历所有loop，确定主边界和孔洞
+                const loopKeys = Object.keys(face);
+                
+                if (loopKeys.length === 0) continue;
+                
+                console.log(`处理面 ${faceKey} 的 ${loopKeys.length} 个环`);
+                
+                // 处理第一个loop作为主边界
+                const firstLoopKey = loopKeys[0];
+                const firstLoop = face[firstLoopKey];
+                
+                console.log(`将 ${firstLoopKey} 视为主边界`);
+                
+                // 检查主边界loop是否包含圆
+                let hasCircleInFirstLoop = false;
+                for (const elementKey in firstLoop) {
+                    if (elementKey.startsWith('circle_')) {
+                        hasCircleInFirstLoop = true;
+                        const circle = firstLoop[elementKey];
+                        console.log('主边界是圆:', circle);
                         
-                        // 线段
+                        // 使用圆创建主形状
+                        mainShape = new THREE.Shape();
+                        const center = circle['Center'];
+                        const radius = circle['Radius'];
+                        
+                        if (center && radius) {
+                            mainShape.absarc(center[0], center[1], radius, 0, Math.PI * 2, false);
+                        }
+                        break;
+                    }
+                }
+                
+                // 如果主边界不是圆，则处理边缘
+                if (!hasCircleInFirstLoop) {
+                    // 提取主边界的所有边
+                    const mainEdges = [];
+                    for (const edgeKey in firstLoop) {
+                        const edge = firstLoop[edgeKey];
+                        
                         if (edgeKey.startsWith('line_')) {
-                            edges.push({
+                            mainEdges.push({
                                 type: 'line',
                                 startPoint: edge['Start Point'],
                                 endPoint: edge['End Point'],
                                 key: edgeKey
                             });
-                        }
-                        // 弧线
-                        else if (edgeKey.startsWith('arc_')) {
-                            edges.push({
+                        } else if (edgeKey.startsWith('arc_')) {
+                            mainEdges.push({
                                 type: 'arc',
                                 startPoint: edge['Start Point'],
                                 midPoint: edge['Mid Point'],
@@ -275,118 +226,221 @@ export class GeometryFactory {
                         }
                     }
                     
-                    // 检查是否有边
-                    if (edges.length === 0) {
-                        console.warn(`环中没有找到有效边: ${faceKey}.${loopKey}`);
-                        continue;
-                    }
-                    
-                    // 对边排序，确保它们连续
-                    const sortedEdges = this.sortEdgesForContinuity(edges);
-                    console.log('排序后的边:', sortedEdges);
-                    
-                    if (sortedEdges.length === 0) {
-                        console.warn('无法创建连续路径');
-                        continue;
-                    }
-                    
-                    // 创建形状路径
-                    let isFirst = true;
-                    
-                    for (const edge of sortedEdges) {
-                        if (isFirst) {
-                            // 首先移动到第一条边的起点
-                            console.log('移动到起点:', edge.startPoint);
-                            shape.moveTo(edge.startPoint[0], edge.startPoint[1]);
-                            isFirst = false;
+                    if (mainEdges.length > 0) {
+                        // 对边排序确保连续
+                        const sortedMainEdges = this.sortEdgesForContinuity(mainEdges);
+                        
+                        // 创建主形状
+                        mainShape = new THREE.Shape();
+                        let isFirst = true;
+                        
+                        for (const edge of sortedMainEdges) {
+                            if (isFirst) {
+                                mainShape.moveTo(edge.startPoint[0], edge.startPoint[1]);
+                                isFirst = false;
+                            }
+                            
+                            if (edge.type === 'line') {
+                                mainShape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                            } else if (edge.type === 'arc') {
+                                const arcParams = this.calculateArcParameters(
+                                    edge.startPoint, 
+                                    edge.midPoint, 
+                                    edge.endPoint
+                                );
+                                
+                                if (arcParams) {
+                                    mainShape.absarc(
+                                        arcParams.center.x,
+                                        arcParams.center.y,
+                                        arcParams.radius,
+                                        arcParams.startAngle,
+                                        arcParams.endAngle,
+                                        arcParams.counterclockwise
+                                    );
+                                } else {
+                                    mainShape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                                }
+                            }
                         }
                         
-                        // 根据边类型添加相应的路径段
-                        if (edge.type === 'line') {
-                            console.log('添加线段到:', edge.endPoint);
-                            shape.lineTo(edge.endPoint[0], edge.endPoint[1]);
-                        } 
-                        else if (edge.type === 'arc') {
-                            // 计算弧线参数
-                            const arcParams = this.calculateArcParameters(
-                                edge.startPoint, 
-                                edge.midPoint, 
-                                edge.endPoint
-                            );
+                        // 闭合主边界
+                        try {
+                            mainShape.closePath();
+                        } catch (error) {
+                            console.warn('闭合主边界失败:', error);
+                            const firstPoint = sortedMainEdges[0].startPoint;
+                            mainShape.lineTo(firstPoint[0], firstPoint[1]);
+                        }
+                    }
+                }
+                
+                // 如果没有有效的主边界，跳过此面
+                if (!mainShape) {
+                    console.warn(`面 ${faceKey} 没有有效的主边界`);
+                    continue;
+                }
+                
+                // 处理剩余loops作为孔洞
+                for (let i = 1; i < loopKeys.length; i++) {
+                    const holeLoopKey = loopKeys[i];
+                    const holeLoop = face[holeLoopKey];
+                    
+                    console.log(`处理 ${holeLoopKey} 作为孔洞`);
+                    
+                    // 检查孔洞是否是圆
+                    let holeShape = null;
+                    
+                    for (const elementKey in holeLoop) {
+                        if (elementKey.startsWith('circle_')) {
+                            const circle = holeLoop[elementKey];
+                            console.log('发现圆形孔洞:', circle);
                             
-                            if (arcParams) {
-                                console.log('添加弧线:', arcParams);
-                                shape.absarc(
-                                    arcParams.center.x,
-                                    arcParams.center.y,
-                                    arcParams.radius,
-                                    arcParams.startAngle,
-                                    arcParams.endAngle,
-                                    arcParams.counterclockwise
-                                );
-                            } else {
-                                console.warn('无法计算弧线参数，使用直线代替');
-                                shape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                            // 使用圆创建孔洞路径
+                            const center = circle['Center'];
+                            const radius = circle['Radius'];
+                            
+                            if (center && radius) {
+                                holeShape = new THREE.Path();
+                                holeShape.absarc(center[0], center[1], radius, 0, Math.PI * 2, true);
+                            }
+                            break;
+                        }
+                    }
+                    
+                    // 如果孔洞不是圆，则处理边缘
+                    if (!holeShape) {
+                        // 提取孔洞的所有边
+                        const holeEdges = [];
+                        for (const edgeKey in holeLoop) {
+                            const edge = holeLoop[edgeKey];
+                            
+                            if (edgeKey.startsWith('line_')) {
+                                holeEdges.push({
+                                    type: 'line',
+                                    startPoint: edge['Start Point'],
+                                    endPoint: edge['End Point'],
+                                    key: edgeKey
+                                });
+                            } else if (edgeKey.startsWith('arc_')) {
+                                holeEdges.push({
+                                    type: 'arc',
+                                    startPoint: edge['Start Point'],
+                                    midPoint: edge['Mid Point'],
+                                    endPoint: edge['End Point'],
+                                    key: edgeKey
+                                });
+                            }
+                        }
+                        
+                        if (holeEdges.length > 0) {
+                            // 对边排序确保连续
+                            const sortedHoleEdges = this.sortEdgesForContinuity(holeEdges);
+                            
+                            // 创建孔洞路径 - 注意这里使用Path而不是Shape
+                            holeShape = new THREE.Path();
+                            let isFirst = true;
+                            
+                            for (const edge of sortedHoleEdges) {
+                                if (isFirst) {
+                                    holeShape.moveTo(edge.startPoint[0], edge.startPoint[1]);
+                                    isFirst = false;
+                                }
+                                
+                                if (edge.type === 'line') {
+                                    holeShape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                                } else if (edge.type === 'arc') {
+                                    const arcParams = this.calculateArcParameters(
+                                        edge.startPoint, 
+                                        edge.midPoint, 
+                                        edge.endPoint
+                                    );
+                                    
+                                    if (arcParams) {
+                                        holeShape.absarc(
+                                            arcParams.center.x,
+                                            arcParams.center.y,
+                                            arcParams.radius,
+                                            arcParams.startAngle,
+                                            arcParams.endAngle,
+                                            arcParams.counterclockwise
+                                        );
+                                    } else {
+                                        holeShape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                                    }
+                                }
+                            }
+                            
+                            // 闭合孔洞路径
+                            try {
+                                holeShape.closePath();
+                            } catch (error) {
+                                console.warn('闭合孔洞失败:', error);
+                                const firstPoint = sortedHoleEdges[0].startPoint;
+                                holeShape.lineTo(firstPoint[0], firstPoint[1]);
                             }
                         }
                     }
                     
-                    // 闭合路径之前确保至少有一个点
-                    if (shape.curves.length > 0) {
-                        // 尝试闭合路径 - 首尾相连
-                        try {
-                            console.log('闭合路径');
-                            shape.closePath();
-                        } catch (error) {
-                            console.warn('闭合路径失败:', error);
-                            // 如果闭合失败，手动添加一条回到起点的线段
-                            const firstPoint = sortedEdges[0].startPoint;
-                            shape.lineTo(firstPoint[0], firstPoint[1]);
-                        }
-                        
-                        // 创建挤压设置
-                        const extrudeSettings = {
-                            steps: 1,
-                            depth: extrusion.extrude_depth_towards_normal || 1,
-                            bevelEnabled: false
-                        };
-                        
-                        try {
-                            // 创建几何体和材质
-                            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-                            const material = new THREE.MeshPhongMaterial({ 
-                                color: 0xB0C4DE,
-                                shininess: 100 
-                            });
-                            
-                            // 应用缩放因子 - 正确方法
-                            if (extrusion.sketch_scale && extrusion.sketch_scale !== 1) {
-                                const scaleFactor = extrusion.sketch_scale;
-                                
-                                // 使用矩阵缩放几何体
-                                const scaleMatrix = new THREE.Matrix4().makeScale(
-                                    scaleFactor, 
-                                    scaleFactor, 
-                                    1
-                                );
-                                
-                                geometry.applyMatrix4(scaleMatrix);
-                                
-                                console.log(`应用缩放因子: ${scaleFactor}`);
-                            }
-                            
-                            // 旋转几何体使其垂直于XZ平面
-                            geometry.rotateX(Math.PI / 2);
-                            
-                            // 创建网格并添加到组
-                            const mesh = new THREE.Mesh(geometry, material);
-                            group.add(mesh);
-                        } catch (error) {
-                            console.error('创建ExtrudeGeometry失败:', error);
-                        }
-                    } else {
-                        console.warn('形状没有有效的曲线，跳过');
+                    // 将有效的孔洞添加到主形状中
+                    if (holeShape) {
+                        console.log('添加孔洞到主形状');
+                        mainShape.holes.push(holeShape);
                     }
+                }
+                
+                // 现在我们有了完整的主形状和孔洞，创建挤压几何体
+                const extrudeSettings = {
+                    steps: 1,
+                    depth: extrusion.extrude_depth_towards_normal || 1,
+                    bevelEnabled: false
+                };
+                
+                try {
+                    // 创建几何体和材质
+                    const geometry = new THREE.ExtrudeGeometry(mainShape, extrudeSettings);
+                    const material = new THREE.MeshPhongMaterial({ 
+                        color: 0xB0C4DE,
+                        shininess: 100 
+                    });
+                    
+                    // 应用缩放因子
+                    if (extrusion.sketch_scale && extrusion.sketch_scale !== 1) {
+                        const scaleFactor = extrusion.sketch_scale;
+                        
+                        // 使用矩阵缩放几何体
+                        const scaleMatrix = new THREE.Matrix4().makeScale(
+                            scaleFactor, 
+                            scaleFactor, 
+                            1
+                        );
+                        
+                        geometry.applyMatrix4(scaleMatrix);
+                        
+                        console.log(`应用缩放因子: ${scaleFactor}`);
+                    }
+                    
+                    // 应用全局比例因子（如果有）
+                    if (extrusion.global_scale_factor) {
+                        const globalScale = extrusion.global_scale_factor;
+                        const scaleMatrix = new THREE.Matrix4().makeScale(
+                            globalScale, 
+                            globalScale, 
+                            globalScale
+                        );
+                        geometry.applyMatrix4(scaleMatrix);
+                        console.log(`应用全局比例因子: ${globalScale}`);
+                    }
+                    
+                    // 旋转几何体使其垂直于XZ平面
+                    geometry.rotateX(-Math.PI / 2);
+                    
+                    // 创建网格并添加到组
+                    const mesh = new THREE.Mesh(geometry, material);
+                    group.add(mesh);
+                    console.log(`成功创建带有 ${mainShape.holes.length} 个孔洞的挤压体`);
+                } catch (error) {
+                    console.error('创建挤压几何体失败:', error);
                 }
             }
             
@@ -510,7 +564,7 @@ export class GeometryFactory {
         );
     }
     
-    // 计算弧线参数
+    // 计算弧线参数 - 通用解决方案
     calculateArcParameters(startPoint, midPoint, endPoint) {
         try {
             if (!startPoint || !midPoint || !endPoint) return null;
@@ -524,27 +578,64 @@ export class GeometryFactory {
             const center = this.findCircleCenter(p1, p2, p3);
             if (!center) return null;
             
-            // 计算半径
+            // 计算半径 (使用第一个点，其他点应该在相同半径上)
             const radius = center.distanceTo(p1);
             
-            // 计算起始角和结束角
-            const startAngle = Math.atan2(p1.y - center.y, p1.x - center.x);
-            const endAngle = Math.atan2(p3.y - center.y, p3.x - center.x);
+            // 计算角度（从中心看）
+            const a1 = Math.atan2(p1.y - center.y, p1.x - center.x);
+            const a2 = Math.atan2(p2.y - center.y, p2.x - center.x);
+            const a3 = Math.atan2(p3.y - center.y, p3.x - center.x);
             
-            // 确定弧线方向（顺时针或逆时针）
-            // 计算从起点到终点的角度差
-            let angleDiff = endAngle - startAngle;
+            // 通用的弧线方向判断算法
+            // 逻辑：如果从起点到终点按逆时针方向移动时能经过中点，则应使用逆时针弧，否则使用顺时针弧
             
-            // 标准化到[-PI, PI]范围
-            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+            // 检查点是否按顺序排列在圆上 (容差范围内)
+            // 校验所有点在同一圆上
+            const r1 = center.distanceTo(p1);
+            const r2 = center.distanceTo(p2);
+            const r3 = center.distanceTo(p3);
+            const rAvg = (r1 + r2 + r3) / 3;
+            const rTolerance = 0.01 * rAvg; // 1%的容差
             
-            // 检查中点是否在计算的弧上
-            const midAngle = Math.atan2(p2.y - center.y, p2.x - center.x);
-            let angleBetween = this.isAngleBetween(startAngle, endAngle, midAngle);
+            const pointsOnCircle = 
+                Math.abs(r1 - rAvg) <= rTolerance && 
+                Math.abs(r2 - rAvg) <= rTolerance && 
+                Math.abs(r3 - rAvg) <= rTolerance;
+                
+            if (!pointsOnCircle) {
+                console.warn('点不在同一圆上，可能导致弧线不准确');
+            }
             
-            // 决定是否为逆时针
-            const counterclockwise = angleBetween ? (angleDiff > 0) : (angleDiff < 0);
+            // 计算从起点沿着圆周逆时针方向到中点的角度
+            let ccwAngleToMid = a2 - a1;
+            if (ccwAngleToMid < 0) ccwAngleToMid += 2 * Math.PI;
+            
+            // 计算从起点沿着圆周逆时针方向到终点的角度
+            let ccwAngleToEnd = a3 - a1;
+            if (ccwAngleToEnd < 0) ccwAngleToEnd += 2 * Math.PI;
+            
+            // 关键判断：如果逆时针到中点的角度小于逆时针到终点的角度，则中点在逆时针路径上
+            const midPointOnCCWPath = ccwAngleToMid >= ccwAngleToEnd;
+            
+            // 设置弧的方向
+            const counterclockwise = midPointOnCCWPath;
+            
+            // 标准化角度到 [0, 2π) 范围
+            const normalizeAngle = (angle) => {
+                let result = angle;
+                while (result < 0) result += Math.PI * 2;
+                while (result >= Math.PI * 2) result -= Math.PI * 2;
+                return result;
+            };
+            
+            const startAngle = normalizeAngle(a1);
+            const endAngle = normalizeAngle(a3);
+            
+            // 调试信息
+            console.log(`圆心=(${center.x.toFixed(4)}, ${center.y.toFixed(4)}), 半径=${radius.toFixed(4)}`);
+            console.log(`点角度: 起点=${(a1 * 180/Math.PI).toFixed(1)}°, 中点=${(a2 * 180/Math.PI).toFixed(1)}°, 终点=${(a3 * 180/Math.PI).toFixed(1)}°`);
+            console.log(`逆时针角度: 到中点=${(ccwAngleToMid * 180/Math.PI).toFixed(1)}°, 到终点=${(ccwAngleToEnd * 180/Math.PI).toFixed(1)}°`);
+            console.log(`中点在逆时针路径上: ${midPointOnCCWPath}, 使用${counterclockwise ? '逆时针' : '顺时针'}弧`);
             
             return {
                 center,
@@ -558,36 +649,15 @@ export class GeometryFactory {
             return null;
         }
     }
-    
-    // 检查一个角度是否在两个角度之间
-    isAngleBetween(startAngle, endAngle, testAngle) {
-        // 标准化所有角度到[0, 2*PI]
-        const normalizeAngle = (angle) => {
-            while (angle < 0) angle += Math.PI * 2;
-            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
-            return angle;
-        };
-        
-        const s = normalizeAngle(startAngle);
-        const e = normalizeAngle(endAngle);
-        const t = normalizeAngle(testAngle);
-        
-        // 处理跨越0度的情况
-        if (s < e) {
-            return t >= s && t <= e;
-        } else {
-            return t >= s || t <= e;
-        }
-    }
-    
-    // 找到三点确定的圆的中心
+
+    // 找到三点确定的圆的中心 - 改进版
     findCircleCenter(p1, p2, p3) {
         try {
             // 检查点是否共线
             const area = Math.abs(
                 (p1.x * (p2.y - p3.y) + 
-                 p2.x * (p3.y - p1.y) + 
-                 p3.x * (p1.y - p2.y)) / 2
+                p2.x * (p3.y - p1.y) + 
+                p3.x * (p1.y - p2.y)) / 2
             );
             
             // 如果面积接近零，点接近共线
@@ -621,7 +691,6 @@ export class GeometryFactory {
             return null;
         }
     }
-
     /**
      * 判断元素类型并提取相应的数据
      * @param {string} key - 元素的键名
