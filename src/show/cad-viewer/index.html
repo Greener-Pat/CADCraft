@@ -37,6 +37,26 @@
             white-space: nowrap;
         }
     </style>
+    <!-- 在 <head> 标签中添加 CodeMirror 引用 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/lint/lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/lint/json-lint.min.js"></script>
+    <!-- 在 <head> 标签中替换或添加这些字体 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+
+    <!-- 添加字体 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Source+Code+Pro&display=swap">
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -77,6 +97,10 @@
 
         <!-- 右侧控制面板 -->
         <aside class="sidebar right">
+            <!-- 侧边栏宽度调整 -->
+            <div class="resize-handle" id="sidebarResizeHandle">
+                <div class="handle-indicator"></div>
+            </div>
             <!-- 文件操作区块 - 可折叠功能 -->
             <div class="sidebar-section">
                 <div class="section-header">
@@ -90,7 +114,7 @@
                         <input type="file" id="fileInput" accept=".json" style="display:none">
                         <button id="loadJsonBtn" class="action-button primary">
                             <i class="fa-solid fa-file-import"></i>
-                            加载JSON文件
+                            加载 JSON 文件
                         </button>
                         <button id="loadSampleBtn" class="action-button secondary">
                             <i class="fa-solid fa-shapes"></i>
@@ -282,6 +306,32 @@
                         <li><i class="fa-solid fa-arrows-up-down"></i> 拖拽绿色箭头沿Y轴移动</li>
                         <li><i class="fa-solid fa-arrows-left-right"></i> 拖拽蓝色箭头沿Z轴移动</li>
                     </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-section" id="jsonEditorSection">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-code"></i> JSON 编辑器</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="editor-area">
+                        <!-- 这是 CodeMirror 应该附加的容器，需要保留并且不带 class="CodeMirror" -->
+                        <div id="jsonEditor"></div>
+                        <div id="jsonEditorStatus" class="status-message"></div>
+                    </div>
+                    <div class="editor-controls">
+                        <button id="formatJsonBtn" class="action-button secondary">
+                            <i class="fa-solid fa-indent"></i>
+                            格式化
+                        </button>
+                        <button id="applyJsonBtn" class="action-button primary">
+                            <i class="fa-solid fa-play"></i>
+                            应用更改
+                        </button>
+                    </div>
                 </div>
             </div>
         </aside>

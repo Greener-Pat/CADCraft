@@ -2,11 +2,13 @@ import { CadRenderer } from './renderer/CadRenderer.js';
 import { updateStatus, showLoading, hideLoading, updateProgress } from './utils/StatusManager.js';
 import { toggleTheme, loadThemePreference, saveSectionState, loadSectionStates, formatSize, getShapeName } from './utils/Utils.js';
 import { ShapeFactory } from './renderer/ShapeFactory.js';
+import { JsonEditor } from './jsonEditor.js';
 
 // 全局变量
 let renderer;
 let currentModelData = null;
 let selectedShape = null;
+let jsonEditor = null;
 
 // 初始化应用
 async function initApp() {
@@ -27,8 +29,13 @@ async function initApp() {
     // 将渲染器保存到全局变量，以便主题管理工具能够访问
     window.renderer = renderer;
     
+    jsonEditor = new JsonEditor();
+    jsonEditor.setRenderer(renderer);
+
     // 加载主题首选项
     loadThemePreference();
+
+    initResizableSidebar();
     
     // 添加事件监听器 - 文件操作
     document.getElementById('loadJsonBtn').addEventListener('click', () => {
@@ -621,7 +628,7 @@ function updateBRepModelInfo(data) {
     modelInfoElement.innerHTML = html;
 }
 
-// 处理文件上传 - 支持标准格式和B-rep格式
+// 修改文件处理函数 - 在适当位置添加编辑器更新
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -658,6 +665,11 @@ function handleFileUpload(event) {
             // 更新模型信息 - 会自动判断格式
             updateModelInfo(data);
             
+            // 更新JSON编辑器内容
+            if (jsonEditor) {
+                jsonEditor.setJson(data);
+            }
+            
             updateProgress(100);
             updateStatus(`${modelType}模型加载完成，点击模型查看控制手柄`);
             setTimeout(hideLoading, 500);
@@ -677,5 +689,118 @@ function handleFileUpload(event) {
     reader.readAsText(file);
 }
 
+// 更新调整侧边栏大小的逻辑
+function initResizableSidebar() {
+    const appContainer = document.querySelector('.app-container');
+    const sidebar = document.querySelector('.sidebar.right');
+    const resizeHandle = document.getElementById('sidebarResizeHandle');
+    const viewerContainer = document.querySelector('.viewer-container');
+    
+    let isResizing = false;
+    let lastDownX = 0;
+    let lastSidebarWidth = sidebar.offsetWidth;
+    let overlay = null;
+    
+    // 初始状态可以从本地存储加载
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (savedWidth) {
+        sidebar.style.width = savedWidth + 'px';
+    }
+    
+    // 创建覆盖层函数 - 在拖动时使用，防止文本选择等问题
+    function createOverlay() {
+        overlay = document.createElement('div');
+        overlay.className = 'resize-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+    // 移除覆盖层函数
+    function removeOverlay() {
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+            overlay = null;
+        }
+    }
+    
+    // 鼠标按下事件
+    resizeHandle.addEventListener('mousedown', function(e) {
+        isResizing = true;
+        lastDownX = e.clientX;
+        lastSidebarWidth = sidebar.offsetWidth;
+        
+        // 添加活动状态样式
+        resizeHandle.classList.add('active');
+        
+        // 创建覆盖层
+        createOverlay();
+        
+        // 防止默认行为和文本选择
+        e.preventDefault();
+    });
+    
+    // 鼠标移动事件 - 添加到document上以允许在整个窗口拖动
+    document.addEventListener('mousemove', function(e) {
+        if (!isResizing) return;
+        
+        // 计算新宽度 - 注意方向，因为手柄在左侧
+        const containerWidth = appContainer.offsetWidth;
+        const delta = lastDownX - e.clientX; // 反向计算，向左拖动增加宽度
+        let newWidth = lastSidebarWidth + delta;
+        
+        // 限制宽度范围
+        const minWidth = 250; // 最小宽度
+        const maxWidth = Math.min(containerWidth * 0.6, window.innerWidth * 0.6); // 最大宽度
+        
+        newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+        
+        // 应用新宽度
+        sidebar.style.width = `${newWidth}px`;
+        
+        // 调整渲染器大小（如果需要）
+        if (window.renderer && window.renderer.updateSize) {
+            window.renderer.updateSize();
+        }
+        
+        // 防止任何默认行为
+        e.preventDefault();
+    });
+    
+    // 鼠标释放事件
+    document.addEventListener('mouseup', function() {
+        if (isResizing) {
+            isResizing = false;
+            
+            // 移除活动状态样式
+            resizeHandle.classList.remove('active');
+            
+            // 移除覆盖层
+            removeOverlay();
+            
+            // 保存侧边栏宽度到本地存储
+            localStorage.setItem('sidebarWidth', sidebar.offsetWidth);
+            
+            // 确保渲染器适应新的容器大小
+            if (window.renderer && window.renderer.updateSize) {
+                setTimeout(() => window.renderer.updateSize(), 100);
+            }
+        }
+    });
+    
+    // 窗口调整大小时，确保侧边栏宽度不超过最大限制
+    window.addEventListener('resize', function() {
+        const maxWidth = Math.min(appContainer.offsetWidth * 0.6, window.innerWidth * 0.6);
+        const currentWidth = sidebar.offsetWidth;
+        
+        if (currentWidth > maxWidth) {
+            sidebar.style.width = `${maxWidth}px`;
+            localStorage.setItem('sidebarWidth', maxWidth);
+        }
+        
+        // 更新渲染器大小
+        if (window.renderer && window.renderer.updateSize) {
+            window.renderer.updateSize();
+        }
+    });
+}
 // 初始化应用
 window.addEventListener('load', initApp);

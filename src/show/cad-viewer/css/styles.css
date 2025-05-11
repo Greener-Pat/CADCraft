@@ -35,7 +35,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'IBM Plex Mono', 'Inconsolata', 'JetBrains Mono', 'Roboto Mono', monospace;
     background-color: var(--background-color);
     color: var(--text-color);
     height: 100vh;
@@ -697,5 +697,199 @@ input:checked + .slider:before {
     
     .shape-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+/* JSON 编辑器样式 - 添加到现有 CSS 文件中 */
+/* 修改 JSON 编辑器样式 */
+.editor-area {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 10px;
+    font-family: 'IBM Plex Mono', 'Inconsolata', 'JetBrains Mono', 'Roboto Mono', monospace;
+}
+
+/* 优化 CodeMirror 中的标点符号和引号显示 */
+
+/* 基础字体设置 - 设置更美观的字体 */
+.CodeMirror {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0.06em !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* 引号和冒号样式 - 使用非常具体的选择器 */
+.CodeMirror .cm-string {
+    color: #64b5f6 !important; /* 字符串颜色 */
+}
+
+/* 引号特别处理 - 给引号单独设置样式 */
+.CodeMirror .cm-string.cm-property,
+.CodeMirror .cm-string span:first-child,
+.CodeMirror .cm-string span:last-child {
+    color: #ff9cac !important; /* 引号用不同颜色 */
+    font-weight: 500 !important; /* 略微加粗 */
+}
+
+/* 属性名样式 */
+.CodeMirror .cm-property {
+    color: #9cdcfe !important;
+    font-weight: 500 !important;
+}
+
+/* 标点符号和括号样式 */
+.CodeMirror .cm-punctuation,
+.CodeMirror .cm-delimiter,
+.CodeMirror .cm-bracket,
+.CodeMirror .cm-operator {
+    color: #e57373 !important; /* 标点符号颜色 */
+    font-weight: 500 !important; /* 加粗标点符号 */
+}
+
+/* 数值样式 */
+.CodeMirror .cm-number,
+.CodeMirror .cm-atom {
+    color: #81c784 !important; /* 数值颜色 */
+}
+
+/* 确保引号看起来更好 */
+.CodeMirror-line {
+    font-feature-settings: "liga" 0, "calt" 0 !important; /* 禁用连字，可能导致引号显示异常 */
+}
+
+/* 为整个编辑器设置更好的引号绘制 */
+.CodeMirror {
+    text-rendering: optimizeLegibility !important;
+}
+
+/* 匹配的括号高亮 */
+.CodeMirror .CodeMirror-matchingbracket {
+    color: #ffeb3b !important;
+    background-color: rgba(255, 235, 59, 0.2) !important;
+    font-weight: bold !important;
+}
+
+/* 对不同层级的缩进添加微弱的边框，提高可读性 */
+.CodeMirror-line {
+    border-left: 1px solid rgba(200, 200, 200, 0.03);
+}
+
+/* Dracula 主题的覆盖样式 - 如果您使用其他主题，可能需要调整 */
+.cm-s-dracula .cm-string {
+    color: #64b5f6 !important;
+}
+
+.cm-s-dracula .cm-property {
+    color: #9cdcfe !important;
+}
+
+.cm-s-dracula .cm-punctuation,
+.cm-s-dracula .cm-bracket {
+    color: #e57373 !important;
+}
+
+/* 适应黑暗模式 */
+body.dark-theme .CodeMirror {
+    border-color: var(--border-color);
+}
+
+.status-message {
+    margin-top: 5px;
+    font-size: 12px;
+    height: 20px;
+    padding: 2px 5px;
+    transition: all 0.3s ease;
+}
+
+.status-message.error {
+    color: var(--error-color, #e74c3c);
+}
+
+.status-message.success {
+    color: var(--success-color, #2ecc71);
+}
+
+.editor-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+/* 响应式布局调整 */
+@media (max-width: 768px) {
+    .CodeMirror {
+        height: 200px;
+    }
+    
+    .editor-controls {
+        flex-direction: column;
+    }
+    
+    .editor-controls button {
+        width: 100%;
+    }
+}
+
+/* 修复调整手柄随滚动消失的问题 */
+.resize-handle {
+    position: fixed; /* 改为固定定位，不随滚动 */
+    width: 8px;
+    top: 60px; /* 与导航栏高度一致 */
+    bottom: 0;
+    cursor: col-resize;
+    z-index: 100;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    /* 左侧位置会由JavaScript动态设置 */
+}
+
+/* 调整手柄的指示条 - 使其高度更长，更容易被看到和点击 */
+.handle-indicator {
+    height: 60px;
+    width: 4px;
+    background-color: var(--border-color, #ccc);
+    border-radius: 2px;
+}
+
+.resize-handle:hover,
+.resize-handle.active {
+    background-color: var(--accent-color, #3498db);
+}
+
+.resize-handle:hover .handle-indicator,
+.resize-handle.active .handle-indicator {
+    background-color: #fff;
+}
+
+/* 确保侧边栏内的内容不会被手柄遮挡 */
+.sidebar.right {
+    padding-left: 10px;
+}
+
+/* 响应式布局调整 */
+@media (max-width: 768px) {
+    .resize-handle {
+        display: none; /* 在小屏幕上隐藏调整手柄 */
+    }
+    
+    .sidebar.right {
+        width: 100%; /* 在小屏幕上占据全宽 */
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 200;
+    }
+    
+    .sidebar.right.visible {
+        transform: translateX(0);
     }
 }
