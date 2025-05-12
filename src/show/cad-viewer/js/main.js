@@ -61,7 +61,7 @@ async function initApp() {
     if (gridSizeInput) {
         gridSizeInput.addEventListener('change', (e) => {
             const size = parseInt(e.target.value);
-            if (size >= 10 && size <= 100) {
+            if (size >= 0 && size <= 10000) {
                 renderer.setGridConfig({ size: size });
             }
         });
@@ -74,7 +74,7 @@ async function initApp() {
             const maxInput = document.getElementById('verticalMaxInput');
             if (maxInput) {
                 const max = parseFloat(maxInput.value);
-                if (min >= 0 && min < max) {
+                if (min >= -10000 && min < max) {
                     renderer.setDragLimits({ vertical: { min: min } });
                 }
             }
