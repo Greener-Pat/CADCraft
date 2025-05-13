@@ -151,7 +151,8 @@ export class GeometryFactory {
         }
     }
     
-   // 从复杂草图创建几何体 - 使用 CSG 布尔运算解决重合边界问题
+   
+    // 从复杂草图创建几何体 - 使用 CSG 布尔运算解决重合边界问题
     createFromComplexSketch(sketchData, extrusion) {
         // 调试输出
         console.log('处理复杂草图:', { sketchData, extrusion });
@@ -169,6 +170,35 @@ export class GeometryFactory {
                 if (loopKeys.length === 0) continue;
                 
                 console.log(`处理面 ${faceKey} 的 ${loopKeys.length} 个环`);
+                
+                // 检查是否有特殊形状 - 圆锥体
+                let hasCone = false;
+                
+                for (const loopKey of loopKeys) {
+                    const loop = face[loopKey];
+                    
+                    // 检查循环中是否有cone_前缀的键
+                    const coneKey = Object.keys(loop).find(key => key.startsWith('cone_'));
+                    
+                    if (coneKey) {
+                        hasCone = true;
+                        const coneData = loop[coneKey];
+                        console.log(`检测到圆锥/圆柱体: ${coneKey}`, coneData);
+                        
+                        // 创建圆锥/圆柱体
+                        const coneMesh = this.createConeFromData(coneData, extrusion);
+                        if (coneMesh) {
+                            group.add(coneMesh);
+                            console.log('成功创建圆锥/圆柱体');
+                        }
+                        break; // 找到一个圆锥就处理完毕
+                    }
+                }
+                
+                // 如果这个面已经作为圆锥处理，继续下一个面
+                if (hasCone) continue;
+                
+                // 以下是原有代码的普通几何体处理...
                 
                 // 如果只有一个环（无孔洞），直接处理
                 if (loopKeys.length === 1) {
@@ -221,7 +251,7 @@ export class GeometryFactory {
                     // 创建孔洞挤压体 - 稍微增大确保完全穿透
                     const holeExtrudeSettings = {
                         steps: 1,
-                        depth: extrusion.extrude_depth_towards_normal * 1.01, // 轻微增大
+                        depth: extrusion.extrude_depth_towards_normal * 1.00, // 轻微增大
                         bevelEnabled: false
                     };
                     
@@ -262,7 +292,94 @@ export class GeometryFactory {
     }
 
     /**
-     * 使用CSG布尔操作解决重叠面问题
+     * 从圆锥数据创建网格
+     * @param {Object} coneData - 圆锥数据，包含中心点和底部半径
+     * @param {Object} extrusion - 挤出信息
+     * @returns {THREE.Mesh} - 圆锥体网格
+     */
+    createConeFromData(coneData, extrusion) {
+        try {
+            // 提取中心点和底部半径
+            const center = coneData.Center || [0, 0];
+            const bottomRadius = coneData.Radius || 1.0;
+            
+            // 获取挤出高度
+            const height = extrusion.extrude_depth_towards_normal || 1.0;
+            
+            console.log(`创建圆锥 - 中心: [${center}], 底部半径: ${bottomRadius}, 高度: ${height}`);
+            
+            // 创建圆锥几何体 - 顶部半径为0，底部半径为指定值
+            // THREE.ConeGeometry 是创建圆锥的专用几何体，但也可以用CylinderGeometry设置顶部半径为0
+            const geometry = new THREE.ConeGeometry(bottomRadius, height, 32);
+            
+            // 创建材质
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0xB0C4DE,
+                shininess: 100
+            });
+            
+            // 创建网格
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            // 设置位置
+            // 注意：THREE.js的圆锥本地坐标系中，高度在Y轴方向，底面在Y=-height/2，顶点在Y=height/2
+            mesh.position.set(center[0], height/2, center[1] || 0);
+            
+            // 如果需要应用坐标系变换
+            this.applyCoordinateSystem(mesh, extrusion);
+            
+            return mesh;
+        } catch (error) {
+            console.error('创建圆锥体时出错:', error);
+            return null;
+        }
+    }
+
+    /**
+     * 应用坐标系变换到网格
+     * @param {THREE.Mesh} mesh - 要变换的网格
+     * @param {Object} extrusion - 包含坐标系信息的挤出数据
+     */
+    applyCoordinateSystem(mesh, extrusion) {
+        // 如果有坐标系信息，应用变换
+        if (extrusion.coordinate_system) {
+            // 应用平移
+            if (extrusion.coordinate_system['Translation Vector']) {
+                const translation = extrusion.coordinate_system['Translation Vector'];
+                mesh.position.x += translation[0] || 0;
+                mesh.position.y += translation[2] || 0; // Z轴映射到Y轴
+                mesh.position.z += translation[1] || 0; // Y轴映射到Z轴
+            }
+            
+            // 应用旋转 (Euler角度)
+            if (extrusion.coordinate_system['Euler Angles']) {
+                const rotation = extrusion.coordinate_system['Euler Angles'];
+                mesh.rotation.x = THREE.MathUtils.degToRad(rotation[0] || 0);
+                mesh.rotation.y = THREE.MathUtils.degToRad(rotation[2] || 0); // Z轴映射到Y轴
+                mesh.rotation.z = THREE.MathUtils.degToRad(rotation[1] || 0); // Y轴映射到Z轴
+            }
+        }
+        
+        // 如果有挤出方向，可能需要调整网格方向
+        if (extrusion.extrude_normal) {
+            const normal = new THREE.Vector3(
+                extrusion.extrude_normal.x || 0,
+                extrusion.extrude_normal.z || 0, // Z轴映射到Y轴
+                extrusion.extrude_normal.y || 0  // Y轴映射到Z轴
+            ).normalize();
+            
+            // 只有在法线不是默认方向时才需调整
+            if (normal.y !== 1) {
+                // 默认圆柱朝向是Y轴(0,1,0)
+                const defaultDir = new THREE.Vector3(0, 1, 0);
+                // 计算从默认方向到目标方向的旋转
+                mesh.quaternion.setFromUnitVectors(defaultDir, normal);
+            }
+        }
+    }
+
+    /**
+     * 正确的CSG布尔操作实现
      * @param {THREE.Mesh} meshA - 第一个网格
      * @param {THREE.Mesh} meshB - 要与第一个网格组合或相减的网格 
      * @param {string} operation - 操作类型: 'subtract', 'union', 'intersect'
