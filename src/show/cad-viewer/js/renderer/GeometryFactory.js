@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import * as THREEMeshBVH from 'three-mesh-bvh';
+import * as CSG  from 'three-bvh-csg';
 
 export class GeometryFactory {
     constructor() {
@@ -149,7 +151,7 @@ export class GeometryFactory {
         }
     }
     
-   // 从复杂草图创建几何体 - 使用双层渲染方法解决重叠边界问题
+   // 从复杂草图创建几何体 - 使用 CSG 布尔运算解决重合边界问题
     createFromComplexSketch(sketchData, extrusion) {
         // 调试输出
         console.log('处理复杂草图:', { sketchData, extrusion });
@@ -168,109 +170,81 @@ export class GeometryFactory {
                 
                 console.log(`处理面 ${faceKey} 的 ${loopKeys.length} 个环`);
                 
-                // 1. 首先处理所有孔洞 - 优先渲染
-                for (let i = 1; i < loopKeys.length; i++) {
-                    const holeLoopKey = loopKeys[i];
-                    const holeLoop = face[holeLoopKey];
+                // 如果只有一个环（无孔洞），直接处理
+                if (loopKeys.length === 1) {
+                    const loop = face[loopKeys[0]];
+                    const shape = this.createShapeFromLoop(loop);
                     
-                    console.log(`处理孔洞 ${holeLoopKey}`);
-                    
-                    // 创建孔洞形状
-                    const holeShape = this.createShapeFromLoop(holeLoop);
-                    
-                    if (!holeShape) {
-                        console.warn(`无法创建孔洞 ${holeLoopKey} 的形状`);
-                        continue;
+                    if (shape) {
+                        const mesh = this.createExtrudedMesh(shape, extrusion);
+                        if (mesh) {
+                            group.add(mesh);
+                        }
                     }
-                    
-                    // 创建稍微突出的孔洞挤压体
-                    const holeExtrudeSettings = {
-                        steps: 1,
-                        depth: extrusion.extrude_depth_towards_normal * 1.001, // 轻微突出
-                        bevelEnabled: false
-                    };
-                    
-                    try {
-                        // 创建孔洞几何体
-                        const holeGeometry = new THREE.ExtrudeGeometry(holeShape, holeExtrudeSettings);
-                        
-                        // 应用变换
-                        this.applyTransforms(holeGeometry, extrusion);
-                        
-                        // 创建特殊材质 - 透明但写入深度缓冲区
-                        const holeMaterial = new THREE.MeshBasicMaterial({
-                            transparent: true,
-                            opacity: 0,
-                            colorWrite: false, // 不写入颜色
-                            depthWrite: true,  // 写入深度
-                            side: THREE.DoubleSide
-                        });
-                        
-                        // 创建孔洞网格并添加到组
-                        const holeMesh = new THREE.Mesh(holeGeometry, holeMaterial);
-                        holeMesh.renderOrder = 0; // 最先渲染
-                        group.add(holeMesh);
-                        
-                        console.log(`创建孔洞网格: ${holeLoopKey}`);
-                    } catch (error) {
-                        console.error(`创建孔洞 ${holeLoopKey} 失败:`, error);
-                    }
+                    continue;
                 }
                 
-                // 2. 然后处理主体
-                const firstLoopKey = loopKeys[0];
-                const firstLoop = face[firstLoopKey];
-                
-                console.log(`处理主体 ${firstLoopKey}`);
-                
-                // 创建主体形状
-                const mainShape = this.createShapeFromLoop(firstLoop);
+                // 处理有孔洞的情况 - 使用 CSG
+                // 1. 创建主体
+                const mainLoop = face[loopKeys[0]];
+                const mainShape = this.createShapeFromLoop(mainLoop);
                 
                 if (!mainShape) {
                     console.warn(`面 ${faceKey} 没有有效的主边界`);
                     continue;
                 }
                 
-                // 将所有孔洞添加到主形状中 - 这里依然添加孔洞以确保基本几何形状正确
-                for (let i = 1; i < loopKeys.length; i++) {
-                    const holeLoopKey = loopKeys[i];
-                    const holeLoop = face[holeLoopKey];
-                    
-                    const holePath = this.createHolePathFromLoop(holeLoop);
-                    if (holePath) {
-                        mainShape.holes.push(holePath);
-                    }
-                }
-                
-                // 创建主体挤压设置
+                // 创建主体挤压体
                 const mainExtrudeSettings = {
                     steps: 1,
                     depth: extrusion.extrude_depth_towards_normal,
                     bevelEnabled: false
                 };
                 
-                try {
-                    // 创建主体几何体
-                    const mainGeometry = new THREE.ExtrudeGeometry(mainShape, mainExtrudeSettings);
+                const mainGeometry = new THREE.ExtrudeGeometry(mainShape, mainExtrudeSettings);
+                this.applyTransforms(mainGeometry, extrusion);
+                
+                // 创建主体网格
+                const mainMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xB0C4DE,
+                    shininess: 100
+                });
+                let resultMesh = new THREE.Mesh(mainGeometry, mainMaterial);
+                
+                // 2. 处理每个孔洞 - 执行布尔减法
+                for (let i = 1; i < loopKeys.length; i++) {
+                    const holeLoop = face[loopKeys[i]];
+                    const holeShape = this.createShapeFromLoop(holeLoop);
                     
-                    // 应用变换
-                    this.applyTransforms(mainGeometry, extrusion);
+                    if (!holeShape) continue;
                     
-                    // 创建特殊材质 - 使用LessEqualDepth深度测试函数
-                    const mainMaterial = new THREE.MeshPhongMaterial({ 
-                        color: 0xB0C4DE,
-                        shininess: 100,
-                        depthFunc: THREE.LessEqualDepth  // 关键: 允许在深度相等时也渲染
-                    });
+                    // 创建孔洞挤压体 - 稍微增大确保完全穿透
+                    const holeExtrudeSettings = {
+                        steps: 1,
+                        depth: extrusion.extrude_depth_towards_normal * 1.01, // 轻微增大
+                        bevelEnabled: false
+                    };
                     
-                    // 创建主体网格并添加到组
-                    const mainMesh = new THREE.Mesh(mainGeometry, mainMaterial);
-                    mainMesh.renderOrder = 1; // 后渲染
-                    group.add(mainMesh);
+                    const holeGeometry = new THREE.ExtrudeGeometry(holeShape, holeExtrudeSettings);
+                    this.applyTransforms(holeGeometry, extrusion);
                     
-                    console.log(`创建主体网格: ${firstLoopKey}`);
-                } catch (error) {
-                    console.error('创建主体几何体失败:', error);
+                    // 创建临时孔洞网格
+                    const holeMaterial = new THREE.MeshBasicMaterial();
+                    const holeMesh = new THREE.Mesh(holeGeometry, holeMaterial);
+                    
+                    // 执行 CSG 布尔减法
+                    try {
+                        console.log(`对孔洞 ${i} 执行 CSG 布尔减法`);
+                        resultMesh = this.performCSGOperation(resultMesh, holeMesh);
+                    } catch (error) {
+                        console.error(`CSG 操作失败:`, error);
+                    }
+                }
+                
+                // 添加最终网格到组
+                if (resultMesh) {
+                    group.add(resultMesh);
+                    console.log(`成功创建带有 ${loopKeys.length - 1} 个孔洞的 CSG 网格`);
                 }
             }
             
@@ -287,7 +261,74 @@ export class GeometryFactory {
         }
     }
 
-    // 从循环中创建形状 - 提取为单独方法以便重用
+    /**
+     * 使用CSG布尔操作解决重叠面问题
+     * @param {THREE.Mesh} meshA - 第一个网格
+     * @param {THREE.Mesh} meshB - 要与第一个网格组合或相减的网格 
+     * @param {string} operation - 操作类型: 'subtract', 'union', 'intersect'
+     * @returns {THREE.Mesh} - 布尔操作结果网格
+     */
+    performCSGOperation(meshA, meshB, operation = 'subtract') {
+        try {
+            // 获取所需类和常量
+            const { Brush, Evaluator, SUBTRACTION, ADDITION, INTERSECTION } = window.CSG || CSG;
+            
+            // 选择正确的操作类型
+            let operationType;
+            switch(operation.toLowerCase()) {
+                case 'union':
+                case 'add':
+                    operationType = ADDITION;
+                    break;
+                case 'intersect':
+                case 'intersection':
+                    operationType = INTERSECTION;
+                    break;
+                case 'subtract':
+                case 'subtraction':
+                default:
+                    operationType = SUBTRACTION;
+                    break;
+            }
+            
+            // 准备Brush对象
+            const brush1 = new Brush(meshA.geometry);
+            brush1.position.copy(meshA.position);
+            brush1.rotation.copy(meshA.rotation);
+            brush1.scale.copy(meshA.scale);
+            brush1.updateMatrixWorld();
+            
+            const brush2 = new Brush(meshB.geometry);
+            brush2.position.copy(meshB.position);
+            brush2.rotation.copy(meshB.rotation);
+            brush2.scale.copy(meshB.scale);
+            brush2.updateMatrixWorld();
+            
+            // 执行布尔操作
+            const evaluator = new Evaluator();
+            // 注意: evaluate返回的是Brush对象，不是几何体
+            const resultBrush = evaluator.evaluate(brush1, brush2, operationType);
+            
+            // 检查结果Brush对象并从中提取几何体
+            if (resultBrush && resultBrush.geometry && 
+                resultBrush.geometry.attributes && 
+                resultBrush.geometry.attributes.position) {
+                
+                // 从Brush对象中提取几何体创建最终网格
+                const resultMesh = new THREE.Mesh(resultBrush.geometry, meshA.material.clone());
+                return resultMesh;
+            } else {
+                console.error('CSG操作未产生有效几何体');
+                return meshA; // 失败时返回原始网格
+            }
+        } catch (error) {
+            console.error('CSG操作失败:', error);
+            console.error('错误堆栈:', error.stack);
+            return meshA; // 出错时返回原始网格
+        }
+    }
+
+    // 从循环创建形状
     createShapeFromLoop(loop) {
         // 检查是否为圆形
         for (const elementKey in loop) {
@@ -378,98 +419,36 @@ export class GeometryFactory {
         return shape;
     }
 
-    // 创建孔洞路径 - 与创建形状类似，但返回Path而不是Shape
-    createHolePathFromLoop(loop) {
-        // 检查是否为圆形
-        for (const elementKey in loop) {
-            if (elementKey.startsWith('circle_')) {
-                const circle = loop[elementKey];
-                const center = circle['Center'];
-                const radius = circle['Radius'];
-                
-                if (center && radius) {
-                    const path = new THREE.Path();
-                    path.absarc(center[0], center[1], radius, 0, Math.PI * 2, true);
-                    return path;
-                }
-            }
-        }
+    // 创建挤压网格
+    createExtrudedMesh(shape, extrusion) {
+        if (!shape) return null;
         
-        // 处理边缘
-        const edges = [];
-        for (const edgeKey in loop) {
-            const edge = loop[edgeKey];
-            
-            if (edgeKey.startsWith('line_')) {
-                edges.push({
-                    type: 'line',
-                    startPoint: edge['Start Point'],
-                    endPoint: edge['End Point'],
-                    key: edgeKey
-                });
-            } else if (edgeKey.startsWith('arc_')) {
-                edges.push({
-                    type: 'arc',
-                    startPoint: edge['Start Point'],
-                    midPoint: edge['Mid Point'],
-                    endPoint: edge['End Point'],
-                    key: edgeKey
-                });
-            }
-        }
-        
-        if (edges.length === 0) return null;
-        
-        // 对边排序确保连续
-        const sortedEdges = this.sortEdgesForContinuity(edges);
-        
-        // 创建路径
-        const path = new THREE.Path();
-        let isFirst = true;
-        
-        for (const edge of sortedEdges) {
-            if (isFirst) {
-                path.moveTo(edge.startPoint[0], edge.startPoint[1]);
-                isFirst = false;
-            }
-            
-            if (edge.type === 'line') {
-                path.lineTo(edge.endPoint[0], edge.endPoint[1]);
-            } else if (edge.type === 'arc') {
-                const arcParams = this.calculateArcParameters(
-                    edge.startPoint, 
-                    edge.midPoint, 
-                    edge.endPoint
-                );
-                
-                if (arcParams) {
-                    path.absarc(
-                        arcParams.center.x,
-                        arcParams.center.y,
-                        arcParams.radius,
-                        arcParams.startAngle,
-                        arcParams.endAngle,
-                        arcParams.counterclockwise
-                    );
-                } else {
-                    path.lineTo(edge.endPoint[0], edge.endPoint[1]);
-                }
-            }
-        }
-        
-        // 闭合路径
         try {
-            path.closePath();
+            // 创建挤压几何体
+            const extrudeSettings = {
+                steps: 1,
+                depth: extrusion.extrude_depth_towards_normal || 1,
+                bevelEnabled: false
+            };
+            
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0xB0C4DE,
+                shininess: 100 
+            });
+            
+            // 应用变换
+            this.applyTransforms(geometry, extrusion);
+            
+            // 创建网格
+            return new THREE.Mesh(geometry, material);
         } catch (error) {
-            console.warn('闭合孔洞路径失败:', error);
-            const firstPoint = sortedEdges[0].startPoint;
-            path.lineTo(firstPoint[0], firstPoint[1]);
+            console.error('创建挤压几何体失败:', error);
+            return null;
         }
-        
-        return path;
     }
 
-    // 应用变换 - 提取为单独方法以便重用
+    // 应用变换
     applyTransforms(geometry, extrusion) {
         // 应用缩放因子
         if (extrusion.sketch_scale && extrusion.sketch_scale !== 1) {
@@ -497,7 +476,7 @@ export class GeometryFactory {
         geometry.rotateX(-Math.PI / 2);
     }
 
-    // 创建回退网格 - 提取为单独方法以便重用
+    // 创建回退网格
     createFallbackMesh(extrusion) {
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshPhongMaterial({ 
@@ -515,7 +494,7 @@ export class GeometryFactory {
         return fallbackMesh;
     }
 
-    // 创建错误指示器 - 提取为单独方法以便重用
+    // 创建错误指示器
     createErrorIndicator() {
         const geometry = new THREE.SphereGeometry(0.5, 16, 16);
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
