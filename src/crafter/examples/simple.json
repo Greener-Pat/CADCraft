@@ -1,0 +1,46 @@
+{
+    "final_name": "Cylinder",
+    "final_shape": "A cylindrical object with a flat circular top and bottom. The top surface is slightly recessed compared to the bottom.",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.375,
+                                0.375
+                            ],
+                            "Radius": 0.375
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.1046,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Cylinder",
+                "shape": "A cylindrical object with a flat circular top and bottom. The top surface is slightly recessed compared to the bottom.",
+                "length": 0.7499999633140781,
+                "width": 0.7499999633140781,
+                "height": 0.10461455694430137
+            }
+        }
+    }
+}
