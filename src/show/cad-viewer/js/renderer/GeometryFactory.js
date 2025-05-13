@@ -326,55 +326,12 @@ export class GeometryFactory {
             mesh.position.set(center[0], height/2, center[1] || 0);
             
             // 如果需要应用坐标系变换
-            this.applyCoordinateSystem(mesh, extrusion);
+            // this.applyCoordinateSystem(mesh, extrusion);
             
             return mesh;
         } catch (error) {
             console.error('创建圆锥体时出错:', error);
             return null;
-        }
-    }
-
-    /**
-     * 应用坐标系变换到网格
-     * @param {THREE.Mesh} mesh - 要变换的网格
-     * @param {Object} extrusion - 包含坐标系信息的挤出数据
-     */
-    applyCoordinateSystem(mesh, extrusion) {
-        // 如果有坐标系信息，应用变换
-        if (extrusion.coordinate_system) {
-            // 应用平移
-            if (extrusion.coordinate_system['Translation Vector']) {
-                const translation = extrusion.coordinate_system['Translation Vector'];
-                mesh.position.x += translation[0] || 0;
-                mesh.position.y += translation[2] || 0; // Z轴映射到Y轴
-                mesh.position.z += translation[1] || 0; // Y轴映射到Z轴
-            }
-            
-            // 应用旋转 (Euler角度)
-            if (extrusion.coordinate_system['Euler Angles']) {
-                const rotation = extrusion.coordinate_system['Euler Angles'];
-                mesh.rotation.x = THREE.MathUtils.degToRad(rotation[0] || 0);
-                mesh.rotation.y = THREE.MathUtils.degToRad(rotation[2] || 0); // Z轴映射到Y轴
-                mesh.rotation.z = THREE.MathUtils.degToRad(rotation[1] || 0); // Y轴映射到Z轴
-            }
-        }
-        
-        // 如果有挤出方向，可能需要调整网格方向
-        if (extrusion.extrude_normal) {
-            const normal = new THREE.Vector3(
-                extrusion.extrude_normal.x || 0,
-                extrusion.extrude_normal.z || 0, // Z轴映射到Y轴
-                extrusion.extrude_normal.y || 0  // Y轴映射到Z轴
-            ).normalize();
-            
-            // 只有在法线不是默认方向时才需调整
-            if (normal.y !== 1) {
-                // 默认圆柱朝向是Y轴(0,1,0)
-                const defaultDir = new THREE.Vector3(0, 1, 0);
-                // 计算从默认方向到目标方向的旋转
-                mesh.quaternion.setFromUnitVectors(defaultDir, normal);
-            }
         }
     }
 
@@ -589,7 +546,7 @@ export class GeometryFactory {
             geometry.applyMatrix4(scaleMatrix);
         }
         
-        // 旋转几何体使其垂直于XZ平面
+        // // 旋转几何体使其垂直于XZ平面
         geometry.rotateX(-Math.PI / 2);
     }
 

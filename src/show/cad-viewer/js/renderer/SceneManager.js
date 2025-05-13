@@ -253,7 +253,10 @@ export class SceneManager {
         mesh.position.x = Math.max(horizontal.min, Math.min(horizontal.max, mesh.position.x));
         mesh.position.y = Math.max(vertical.min, Math.min(vertical.max, mesh.position.y));
         mesh.position.z = Math.max(horizontal.min, Math.min(horizontal.max, mesh.position.z));
-        
+
+        mesh.position.y *= -1;
+        mesh.position.y *= -1;
+
         // 添加到场景和列表
         this.scene.add(mesh);
         this.cadObjects.push(mesh);
@@ -440,25 +443,8 @@ export class SceneManager {
             this.applyTransform(mesh, transform);
             
             // 添加全局比例因子 - 调整模型大小
-            const globalScale = 10.0; // 调整此值可放大或缩小模型
-            mesh.scale.set(globalScale, globalScale, globalScale);
-            
-            // 计算模型的包围盒，用于确定底部位置
-            let boundingBox = new THREE.Box3().setFromObject(mesh);
-            let modelHeight = boundingBox.max.y - boundingBox.min.y;
-            
-            // 强制提升模型到栅格上方 - 使用更大的偏移量
-            // 如果模型底部在 y=0 下方，则将其提升
-            if (boundingBox.min.y <= 0) {
-                // 移动模型使其底部位于 y=1 (确保在栅格之上)
-                const yOffset = Math.abs(boundingBox.min.y) + 1;
-                console.log(`模型底部在 ${boundingBox.min.y}，提升 ${yOffset} 单位`);
-                mesh.position.y += yOffset;
-            } else {
-                // 即使已在栅格上方，也添加一些额外提升
-                mesh.position.y += 1;
-                console.log(`模型已在栅格上方 (${boundingBox.min.y})，添加额外提升`);
-            }
+            const globalScale = 1.0; // 调整此值可放大或缩小模型
+            mesh.scale.set(globalScale, globalScale, -globalScale);
             
             // 添加到场景
             this.addObjectToScene(mesh);
@@ -477,8 +463,8 @@ export class SceneManager {
         // 应用平移
         if (transform.translation) {
             const tx = transform.translation[0] || 0;
-            const ty = transform.translation[1] || 0;
-            const tz = transform.translation[2] || 0;
+            const ty = transform.translation[2] || 0;
+            const tz = transform.translation[1] || 0;
             mesh.position.x += tx;
             mesh.position.y += ty;
             mesh.position.z += tz;
@@ -487,8 +473,8 @@ export class SceneManager {
         // 应用旋转
         if (transform.rotation) {
             const rx = (transform.rotation[0] || 0) * Math.PI / 180;
-            const ry = (transform.rotation[1] || 0) * Math.PI / 180;
-            const rz = (transform.rotation[2] || 0) * Math.PI / 180;
+            const ry = (transform.rotation[2] || 0) * Math.PI / 180;
+            const rz = (transform.rotation[1] || 0) * Math.PI / 180;
             
             mesh.rotation.x += rx;
             mesh.rotation.y += ry;
