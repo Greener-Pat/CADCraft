@@ -1,0 +1,78 @@
+{
+    "name": "a castle with four towers",
+    "parts": {
+        "part_1": {
+            "id": "1",
+            "type": "cuboid",
+            "description": "main body",
+            "params": [0.5, 0.3, 0.2],
+            "position": [0.0, 0.0, 0.0]
+        },
+        "part_2": {
+            "id": "2",
+            "type": "cylinder",
+            "description": "tower1",
+            "params": [0.1, 0.3],
+            "position": [0.0, 0.0, 0.0]
+        },
+        "part_3": {
+            "id": "3",
+            "type": "cylinder",
+            "description": "tower2",
+            "params": [0.1, 0.3],
+            "position": [0.5, 0.0, 0.0]
+        },
+        "part_4": {
+            "id": "4",
+            "type": "cylinder",
+            "description": "tower3",
+            "params": [0.1, 0.3],
+            "position": [0.5, 0.3, 0.0]
+        },
+        "part_5": {
+            "id": "5",
+            "type": "cylinder",
+            "description": "tower4",
+            "params": [0.1, 0.3],
+            "position": [0.0, 0.3, 0.0]
+        }
+    },
+    "positional relationship": [
+        {
+            "from": 1,
+            "to": 2,
+            "relationship": {
+                "x": ["left", "intersect"],
+                "y": ["front", "seperate"],
+                "z": ["align", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 3,
+            "relationship": {
+                "x": ["right", "intersect"],
+                "y": ["front", "seperate"],
+                "z": ["align", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 4,
+            "relationship": {
+                "x": ["left", "intersect"],
+                "y": ["back", "seperate"],
+                "z": ["align", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 5,
+            "relationship": {
+                "x": ["right", "intersect"],
+                "y": ["back", "seperate"],
+                "z": ["align", "intersect"]
+            }
+        }
+    ]
+}
