@@ -1,0 +1,139 @@
+{
+    "final_name": "CartoonBoy",
+    "final_shape": "A stylized character with a spherical head and cubic torso",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "arc_1": {
+                            "Start Point": [
+                                0.5,
+                                0.0
+                            ],
+                            "Mid Point": [
+                                0.7,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.5,
+                                1.0
+                            ]
+                        },
+                        "arc_2": {
+                            "Start Point": [
+                                0.5,
+                                1.0
+                            ],
+                            "Mid Point": [
+                                0.3,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.5,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Head",
+                "shape": "Perfect sphere created through two semicircular arcs",
+                "diameter": 1.0,
+                "height": 0.5
+            }
+        },
+        "part_2": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    -0.6
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                1.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                1.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.0,
+                                1.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 1.2,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.8,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Body",
+                "shape": "Rectangular prism with 1:1:1.5 proportions",
+                "length": 1.0,
+                "width": 1.0,
+                "height": 1.2
+            }
+        }
+    }
+}

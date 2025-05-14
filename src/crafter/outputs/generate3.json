@@ -1,0 +1,118 @@
+{
+    "final_name": "Cartoon Boy",
+    "final_shape": "A simplified character with spherical head and rectangular body",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                -0.3,
+                                -0.4
+                            ],
+                            "End Point": [
+                                0.3,
+                                -0.4
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.3,
+                                -0.4
+                            ],
+                            "End Point": [
+                                0.3,
+                                0.4
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.3,
+                                0.4
+                            ],
+                            "End Point": [
+                                -0.3,
+                                0.4
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                -0.3,
+                                0.4
+                            ],
+                            "End Point": [
+                                -0.3,
+                                -0.4
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.2,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Body",
+                "shape": "Rectangular prism body with rounded edges",
+                "length": 0.6,
+                "width": 0.8,
+                "height": 0.2
+            }
+        },
+        "part_2": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.2
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 0.25
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.15,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "JoinFeatureOperation"
+            },
+            "description": {
+                "name": "Head",
+                "shape": "Spherical head with flat base",
+                "diameter": 0.5,
+                "height": 0.15
+            }
+        }
+    }
+}

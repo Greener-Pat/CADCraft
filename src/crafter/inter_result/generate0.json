@@ -1,0 +1,149 @@
+{
+    "name": "a vertical pole composed of five concentric cylinders",
+    "parts": {
+        "part_1": {
+            "id": "1",
+            "type": "cylinder",
+            "description": "cylinder1",
+            "params": [
+                0.1,
+                1.0
+            ],
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "part_2": {
+            "id": "2",
+            "type": "cylinder",
+            "description": "cylinder2",
+            "params": [
+                0.15,
+                1.0
+            ],
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "part_3": {
+            "id": "3",
+            "type": "cylinder",
+            "description": "cylinder3",
+            "params": [
+                0.2,
+                1.0
+            ],
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "part_4": {
+            "id": "4",
+            "type": "cylinder",
+            "description": "cylinder4",
+            "params": [
+                0.25,
+                1.0
+            ],
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "part_5": {
+            "id": "5",
+            "type": "cylinder",
+            "description": "cylinder5",
+            "params": [
+                0.3,
+                1.0
+            ],
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    "positional relationship": [
+        {
+            "from": 1,
+            "to": 2,
+            "relationship": {
+                "x": [
+                    "center",
+                    "intersect"
+                ],
+                "y": [
+                    "center",
+                    "intersect"
+                ],
+                "z": [
+                    "center",
+                    "intersect"
+                ]
+            }
+        },
+        {
+            "from": 2,
+            "to": 3,
+            "relationship": {
+                "x": [
+                    "center",
+                    "intersect"
+                ],
+                "y": [
+                    "center",
+                    "intersect"
+                ],
+                "z": [
+                    "center",
+                    "intersect"
+                ]
+            }
+        },
+        {
+            "from": 3,
+            "to": 4,
+            "relationship": {
+                "x": [
+                    "center",
+                    "intersect"
+                ],
+                "y": [
+                    "center",
+                    "intersect"
+                ],
+                "z": [
+                    "center",
+                    "intersect"
+                ]
+            }
+        },
+        {
+            "from": 4,
+            "to": 5,
+            "relationship": {
+                "x": [
+                    "center",
+                    "intersect"
+                ],
+                "y": [
+                    "center",
+                    "intersect"
+                ],
+                "z": [
+                    "up",
+                    "intersect"
+                ]
+            }
+        }
+    ]
+}
