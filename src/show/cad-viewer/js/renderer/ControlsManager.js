@@ -209,9 +209,9 @@ export class ControlsManager {
         this.controlPoints.z.visible = zDot < 0.9;
     }
 
-    // 更新Gizmo位置和尺寸
+
     updateGizmoPosition(object) {
-        if (!this.gizmo || !object) return;
+        if (!object || !this.gizmo) return;
         
         // 更新位置
         this.gizmo.position.copy(object.position);
@@ -257,26 +257,36 @@ export class ControlsManager {
         return true;
     }
     
-   // 更新拖拽 - 考虑相机视角的版本
+    // 更新拖拽 - 考虑对象实际变换矩阵的版本
     updateDrag(object, mouseX, mouseY) {
         if (!this.isDragging || !object || !this.dragAxis) return 0;
         
         // 获取相机
         const camera = this.renderer.sceneManager.camera;
         
-        // 计算鼠标移动距离
-        let mouseDelta = 0;
+        // 创建表示当前拖拽轴的方向向量 (世界坐标系)
+        const worldAxisVector = new THREE.Vector3();
+        if (this.dragAxis === 'x') worldAxisVector.set(1, 0, 0);
+        else if (this.dragAxis === 'y') worldAxisVector.set(0, 1, 0);
+        else if (this.dragAxis === 'z') worldAxisVector.set(0, 0, 1);
         
-        // 创建表示当前拖拽轴的方向向量
-        const axisVector = new THREE.Vector3();
-        if (this.dragAxis === 'x') axisVector.set(1, 0, 0);
-        else if (this.dragAxis === 'y') axisVector.set(0, 1, 0);
-        else if (this.dragAxis === 'z') axisVector.set(0, 0, 1);
+        // 从对象的世界矩阵中提取旋转部分
+        const objectMatrix = object.matrixWorld.clone();
+        // 移除平移部分
+        objectMatrix.setPosition(new THREE.Vector3(0, 0, 0));
+        // 移除缩放部分 (如果有)
+        const scale = new THREE.Vector3();
+        objectMatrix.decompose(new THREE.Vector3(), new THREE.Quaternion(), scale);
+        const invScale = new THREE.Matrix4().makeScale(1/scale.x, 1/scale.y, 1/scale.z);
+        objectMatrix.multiply(invScale);
         
-        // 将轴向量从世界坐标转换为屏幕坐标
-        // 使用两点法：原点 + 轴向量
+        // 将世界轴向量变换到对象的局部空间
+        const objectAxisVector = worldAxisVector.clone().applyMatrix4(objectMatrix);
+        
+        // 用对象的位置作为起点
         const startPoint = object.position.clone();
-        const endPoint = startPoint.clone().add(axisVector);
+        // 添加变换后的轴向量得到终点
+        const endPoint = startPoint.clone().add(objectAxisVector);
         
         // 将这两个点投影到屏幕上
         const startScreenPos = startPoint.clone().project(camera);
@@ -291,41 +301,23 @@ export class ControlsManager {
         // 计算鼠标移动向量
         const mouseMove = new THREE.Vector2(
             mouseX - this.dragStartMousePosition.x,
-            -(mouseY - this.dragStartMousePosition.y) // 屏幕Y轴向下为正，需要反转
+            -(mouseY - this.dragStartMousePosition.y)
         );
         
-        // 计算鼠标移动在轴方向上的投影长度(点积)
-        mouseDelta = mouseMove.dot(screenAxisVector);
+        // 计算鼠标移动在轴方向上的投影长度
+        const mouseDelta = mouseMove.dot(screenAxisVector) * this.dragScale;
         
-        // 应用缩放因子
-        mouseDelta *= this.dragScale;
+        // 创建世界空间中沿对象轴方向的移动向量
+        const moveVector = objectAxisVector.clone().multiplyScalar(mouseDelta);
         
         // 计算新位置
-        const newPosition = this.dragStartPosition.clone();
-        
-        // 应用移动距离
-        newPosition[this.dragAxis] += mouseDelta;
+        const newPosition = this.dragStartPosition.clone().add(moveVector);
         
         // 应用边界限制
         const { horizontal, vertical } = this.renderer.dragLimits;
-        
-        if (this.dragAxis === 'y') {
-            // 垂直方向限制
-            newPosition.y = Math.max(
-                vertical.min,
-                Math.min(vertical.max, newPosition.y)
-            );
-        } else {
-            // 水平方向限制
-            newPosition.x = Math.max(
-                horizontal.min,
-                Math.min(horizontal.max, newPosition.x)
-            );
-            newPosition.z = Math.max(
-                horizontal.min,
-                Math.min(horizontal.max, newPosition.z)
-            );
-        }
+        newPosition.y = Math.max(vertical.min, Math.min(vertical.max, newPosition.y));
+        newPosition.x = Math.max(horizontal.min, Math.min(horizontal.max, newPosition.x));
+        newPosition.z = Math.max(horizontal.min, Math.min(horizontal.max, newPosition.z));
         
         // 更新对象位置
         object.position.copy(newPosition);
@@ -334,9 +326,9 @@ export class ControlsManager {
         this.updateGizmoPosition(object);
         
         // 计算移动距离
-        const distance = Math.abs(object.position[this.dragAxis] - this.dragStartPosition[this.dragAxis]);
+        const distance = moveVector.length();
         
-        // 更新距离标签
+        // 更新距离标签 - 显示轴名称和实际距离
         this.showDistanceLabel(distance, mouseX, mouseY);
         
         return distance;
@@ -350,10 +342,8 @@ export class ControlsManager {
         
         // 如果有拖拽轴和对象
         if (this.dragAxis && object) {
-            // 计算总移动距离
-            const distance = Math.abs(
-                object.position[this.dragAxis] - this.dragStartPosition[this.dragAxis]
-            );
+            // 计算开始位置和当前位置之间的距离
+            const distance = this.dragStartPosition.distanceTo(object.position);
             
             // 保存当前拖拽轴信息
             const axis = this.dragAxis;

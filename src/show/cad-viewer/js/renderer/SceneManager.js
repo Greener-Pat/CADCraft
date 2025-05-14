@@ -254,9 +254,6 @@ export class SceneManager {
         mesh.position.y = Math.max(vertical.min, Math.min(vertical.max, mesh.position.y));
         mesh.position.z = Math.max(horizontal.min, Math.min(horizontal.max, mesh.position.z));
 
-        mesh.position.y *= -1;
-        mesh.position.y *= -1;
-
         // 添加到场景和列表
         this.scene.add(mesh);
         this.cadObjects.push(mesh);
@@ -444,7 +441,7 @@ export class SceneManager {
             
             // 添加全局比例因子 - 调整模型大小
             const globalScale = 1.0; // 调整此值可放大或缩小模型
-            mesh.scale.set(globalScale, globalScale, -globalScale);
+            mesh.scale.set(globalScale, globalScale, globalScale);
             
             // 添加到场景
             this.addObjectToScene(mesh);
@@ -480,5 +477,8 @@ export class SceneManager {
             mesh.rotation.y += ry;
             mesh.rotation.z += rz;
         }
+
+        console.log('applytranform\'s mesh rotation is ', mesh.rotation);
+
     }
 }

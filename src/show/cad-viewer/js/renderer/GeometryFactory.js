@@ -323,7 +323,7 @@ export class GeometryFactory {
             
             // 设置位置
             // 注意：THREE.js的圆锥本地坐标系中，高度在Y轴方向，底面在Y=-height/2，顶点在Y=height/2
-            mesh.position.set(center[0], height/2, center[1] || 0);
+            mesh.position.set(center[0], height/2, -center[1] || 0);
             
             // 如果需要应用坐标系变换
             // this.applyCoordinateSystem(mesh, extrusion);
@@ -413,7 +413,7 @@ export class GeometryFactory {
                 
                 if (center && radius) {
                     const shape = new THREE.Shape();
-                    shape.absarc(center[0], center[1], radius, 0, Math.PI * 2, false);
+                    shape.absarc(center[0], -center[1], radius, 0, Math.PI * 2, false);
                     return shape;
                 }
             }
@@ -453,13 +453,21 @@ export class GeometryFactory {
         
         for (const edge of sortedEdges) {
             if (isFirst) {
-                shape.moveTo(edge.startPoint[0], edge.startPoint[1]);
+                shape.moveTo(edge.startPoint[0], -edge.startPoint[1]);
                 isFirst = false;
             }
             
             if (edge.type === 'line') {
-                shape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                shape.lineTo(edge.endPoint[0], -edge.endPoint[1]);
             } else if (edge.type === 'arc') {
+
+                if (edge.midPoint[1] > 0)
+                    console.log("this one is correct !!!!!!");
+
+                edge.startPoint[1] *= -1;
+                edge.midPoint[1] *= -1;
+                edge.endPoint[1] *= -1
+
                 const arcParams = this.calculateArcParameters(
                     edge.startPoint, 
                     edge.midPoint, 
@@ -476,7 +484,7 @@ export class GeometryFactory {
                         arcParams.counterclockwise
                     );
                 } else {
-                    shape.lineTo(edge.endPoint[0], edge.endPoint[1]);
+                    shape.lineTo(edge.endPoint[0], -edge.endPoint[1]);
                 }
             }
         }
@@ -487,7 +495,7 @@ export class GeometryFactory {
         } catch (error) {
             console.warn('闭合形状失败:', error);
             const firstPoint = sortedEdges[0].startPoint;
-            shape.lineTo(firstPoint[0], firstPoint[1]);
+            shape.lineTo(firstPoint[0], -firstPoint[1]);
         }
         
         return shape;
@@ -587,9 +595,13 @@ export class GeometryFactory {
         // 当前活动边的终点
         let currentEndPoint = edges[0].endPoint;
         
+        console.log('当前终点:', edges);
+
         // 尝试找到连续的边
         while (sortedEdges.length < edges.length) {
             let foundNext = false;
+
+            console.log('current edges are:', sortedEdges)
             
             for (let i = 0; i < edges.length; i++) {
                 if (usedIndices.has(i)) continue;
