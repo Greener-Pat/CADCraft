@@ -1,0 +1,82 @@
+{
+    "name": "a castle with four towers",
+    "parts": {
+        "part_1": {
+            "id": 1,
+            "description": "the main body in shape of cuboid",
+            "position": [0.0, 0.0, 0.0]
+        },
+        "part_2": {
+            "id": 2,
+            "description": "the first tower with cylinder body and cone head",
+            "position": [0.0, 0.0, 0.0]
+        },
+        "part_3": {
+            "id": 3,
+            "description": "the second tower with cylinder body and cone head",
+            "position": [0.5, 0.0, 0.0]
+        },
+        "part_4": {
+            "id": 4,
+            "description": "the third tower with cylinder body and cone head",
+            "position": [0.5, 0.3, 0.0]
+        },
+        "part_5": {
+            "id": 5,
+            "description": "the fourth tower with cylinder body and cone head",
+            "position": [0.0, 0.3, 0.0]
+        },
+        "part_6": {
+            "id": 6,
+            "description": "A gate whose direct view image is a rectangular",
+            "position": [0.25, 0.0, 0.0]
+        }
+    },
+    "positional relationship": [
+        {
+            "from": 1,
+            "to": 2,
+            "relationship": {
+                "x": ["left", "intersect"],
+                "y": ["front", "seperate"],
+                "z": ["none", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 3,
+            "relationship": {
+                "x": ["right", "intersect"],
+                "y": ["front", "seperate"],
+                "z": ["none", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 4,
+            "relationship": {
+                "x": ["left", "intersect"],
+                "y": ["back", "seperate"],
+                "z": ["none", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 5,
+            "relationship": {
+                "x": ["right", "intersect"],
+                "y": ["back", "seperate"],
+                "z": ["none", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 6,
+            "relationship": {
+                "x": ["center", "intersect"],
+                "y": ["front", "intersect"],
+                "z": ["none", "intersect"]
+            }
+        }
+    ]
+}

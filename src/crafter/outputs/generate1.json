@@ -1,0 +1,266 @@
+{
+    "final_name": "Castle",
+    "final_shape": "A medieval castle with a central gate opening and four corner towers",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                -5.0,
+                                -4.0
+                            ],
+                            "End Point": [
+                                5.0,
+                                -4.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                5.0,
+                                -4.0
+                            ],
+                            "End Point": [
+                                5.0,
+                                4.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                5.0,
+                                4.0
+                            ],
+                            "End Point": [
+                                -5.0,
+                                4.0
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                -5.0,
+                                4.0
+                            ],
+                            "End Point": [
+                                -5.0,
+                                -4.0
+                            ]
+                        }
+                    },
+                    "loop_2": {
+                        "line_1": {
+                            "Start Point": [
+                                -2.0,
+                                -4.0
+                            ],
+                            "End Point": [
+                                -2.0,
+                                0.0
+                            ]
+                        },
+                        "arc_1": {
+                            "Start Point": [
+                                -2.0,
+                                0.0
+                            ],
+                            "Mid Point": [
+                                0.0,
+                                1.5
+                            ],
+                            "End Point": [
+                                2.0,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                2.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                2.0,
+                                -4.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 8.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Main Structure",
+                "shape": "Rectangular castle body with arched gate opening",
+                "length": 10.0,
+                "width": 8.0,
+                "height": 8.0
+            }
+        },
+        "part_2": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    5.5,
+                    5.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 1.5
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 12.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "NE Tower",
+                "shape": "Cylindrical corner tower",
+                "diameter": 3.0,
+                "height": 12.0
+            }
+        },
+        "part_3": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    5.5,
+                    -5.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 1.5
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 12.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "SE Tower",
+                "shape": "Cylindrical corner tower",
+                "diameter": 3.0,
+                "height": 12.0
+            }
+        },
+        "part_4": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    -5.5,
+                    5.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 1.5
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 12.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "NW Tower",
+                "shape": "Cylindrical corner tower",
+                "diameter": 3.0,
+                "height": 12.0
+            }
+        },
+        "part_5": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    -5.5,
+                    -5.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 1.5
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 12.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "SW Tower",
+                "shape": "Cylindrical corner tower",
+                "diameter": 3.0,
+                "height": 12.0
+            }
+        }
+    }
+}

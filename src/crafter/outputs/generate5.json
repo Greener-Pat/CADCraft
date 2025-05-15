@@ -1,0 +1,770 @@
+{
+    "final_name": "a boy with a round head and cubic arms, body and legs",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.375,
+                                0.375
+                            ],
+                            "Radius": 0.375
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.0909,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Cylinder",
+                "shape": "A cylindrical object with a flat circular top and bottom. The top surface is slightly recessed compared to the bottom.",
+                "length": 0.7499999999999999,
+                "width": 0.7499999999999999,
+                "height": 0.0909090909090909
+            }
+        },
+        "part_2": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0864,
+                    0.0864,
+                    0.0909,
+                    0.0,
+                    0.0,
+                    0.5
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.2886,
+                                0.2886
+                            ],
+                            "Radius": 0.2886
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.0909,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.5773,
+                "operation": "JoinFeatureOperation"
+            },
+            "description": {
+                "name": "Cylinder",
+                "shape": "A cylindrical object with a flat circular top and bottom. The top surface is slightly recessed compared to the bottom.",
+                "length": 0.5772727272727272,
+                "width": 0.5772727272727272,
+                "height": 0.0909090909090909
+            }
+        },
+        "part_3": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.1773,
+                    0.1773,
+                    0.1818,
+                    0.0,
+                    0.0,
+                    0.5
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.1977,
+                                0.1977
+                            ],
+                            "Radius": 0.1977
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.0,
+                "extrude_depth_opposite_normal": 0.0909,
+                "sketch_scale": 0.3955,
+                "operation": "CutFeatureOperation"
+            },
+            "description": {
+                "name": "Cylinder",
+                "shape": "A cylindrical object with a flat circular top and bottom. The top surface is slightly concave.",
+                "length": 0.39545454545454534,
+                "width": 0.39545454545454534,
+                "height": 0.0909090909090909
+            }
+        },
+        "part_4": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    -90.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.075,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.75,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.1875
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.75,
+                                0.1875
+                            ],
+                            "End Point": [
+                                0.6,
+                                0.3375
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.6,
+                                0.3375
+                            ],
+                            "End Point": [
+                                0.375,
+                                0.3375
+                            ]
+                        },
+                        "line_5": {
+                            "Start Point": [
+                                0.375,
+                                0.3375
+                            ],
+                            "End Point": [
+                                0.375,
+                                0.1875
+                            ]
+                        },
+                        "line_6": {
+                            "Start Point": [
+                                0.375,
+                                0.1875
+                            ],
+                            "End Point": [
+                                0.225,
+                                0.1875
+                            ]
+                        },
+                        "line_7": {
+                            "Start Point": [
+                                0.225,
+                                0.1875
+                            ],
+                            "End Point": [
+                                0.225,
+                                0.3375
+                            ]
+                        },
+                        "line_8": {
+                            "Start Point": [
+                                0.225,
+                                0.3375
+                            ],
+                            "End Point": [
+                                0.075,
+                                0.3375
+                            ]
+                        },
+                        "line_9": {
+                            "Start Point": [
+                                0.075,
+                                0.3375
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.2625
+                            ]
+                        },
+                        "line_10": {
+                            "Start Point": [
+                                0.0,
+                                0.2625
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.075,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "",
+                "shape": "The object is a rectangular prism with a curved top and a rectangular cutout in the middle.",
+                "length": 0.75,
+                "width": 0.3375,
+                "height": 0.075
+            }
+        },
+        "part_5": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    -90.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.4286,
+                    0.0,
+                    -0.3,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.75,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.4286
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.75,
+                                0.4286
+                            ],
+                            "End Point": [
+                                0.6429,
+                                0.4286
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.6429,
+                                0.4286
+                            ],
+                            "End Point": [
+                                0.6429,
+                                0.1071
+                            ]
+                        },
+                        "line_5": {
+                            "Start Point": [
+                                0.6429,
+                                0.1071
+                            ],
+                            "End Point": [
+                                0.1071,
+                                0.1071
+                            ]
+                        },
+                        "line_6": {
+                            "Start Point": [
+                                0.1071,
+                                0.1071
+                            ],
+                            "End Point": [
+                                0.1071,
+                                0.4286
+                            ]
+                        },
+                        "line_7": {
+                            "Start Point": [
+                                0.1071,
+                                0.4286
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.4286
+                            ]
+                        },
+                        "line_8": {
+                            "Start Point": [
+                                0.0,
+                                0.4286
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.4286,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "L-shaped CAD Model",
+                "shape": "The object is an L-shaped CAD model with a rectangular base and a vertical extension on one side. The base has a slight inward curve on the top edge.",
+                "length": 0.7500000000000001,
+                "width": 0.42857142857142855,
+                "height": 0.4285714285714286
+            }
+        },
+        "part_6": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    -90.0,
+                    0.0,
+                    -90.0
+                ],
+                "Translation Vector": [
+                    0.75,
+                    0.1071,
+                    0.1607,
+                    -0.3,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.2143,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.2143,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.2143,
+                                0.2143
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.2143,
+                                0.2143
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.2143
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.0,
+                                0.2143
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.0,
+                "extrude_depth_opposite_normal": 0.75,
+                "sketch_scale": 0.2143,
+                "operation": "CutFeatureOperation"
+            },
+            "description": {
+                "name": "",
+                "shape": "The object is a rectangular prism with a flat top and bottom. The top surface is slightly tilted compared to the bottom surface.",
+                "length": 0.21428571428571427,
+                "width": 0.21428571428571425,
+                "height": 0.7500000000000001
+            }
+        },
+        "part_7": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    -90.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.5,
+                    0.0,
+                    0.3,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.75,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.375
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.75,
+                                0.375
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.375
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.5,
+                                0.375
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.5
+                            ]
+                        },
+                        "line_5": {
+                            "Start Point": [
+                                0.5,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_6": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.25,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "",
+                "shape": "The object is a three-dimensional model with a rectangular base and a smaller rectangular extension on top. The top surface is slightly tilted relative to the base.",
+                "length": 0.7499999999999998,
+                "width": 0.49999999999999983,
+                "height": 0.24999999999999997
+            }
+        },
+        "part_8": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    -90.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.625,
+                    0.0,
+                    -0.15,
+                    0.0,
+                    -0.4
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.25,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.25,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.75,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.25
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.75,
+                                0.25
+                            ],
+                            "End Point": [
+                                0.25,
+                                0.25
+                            ]
+                        },
+                        "line_5": {
+                            "Start Point": [
+                                0.25,
+                                0.25
+                            ],
+                            "End Point": [
+                                0.25,
+                                0.4982
+                            ]
+                        },
+                        "line_6": {
+                            "Start Point": [
+                                0.25,
+                                0.4982
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_7": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.625,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "",
+                "shape": "The object is a two-step block with a rectangular base and a smaller rectangular top. The top is offset to the right of the base, creating a T-shaped structure.",
+                "length": 0.7499999999999999,
+                "width": 0.49999999999999994,
+                "height": 0.625
+            }
+        },
+        "part_9": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    -90.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.625,
+                    0.0,
+                    0.15,
+                    0.0,
+                    -0.4
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.25,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.25,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.75,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.75,
+                                0.25
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.75,
+                                0.25
+                            ],
+                            "End Point": [
+                                0.25,
+                                0.25
+                            ]
+                        },
+                        "line_5": {
+                            "Start Point": [
+                                0.25,
+                                0.25
+                            ],
+                            "End Point": [
+                                0.25,
+                                0.4982
+                            ]
+                        },
+                        "line_6": {
+                            "Start Point": [
+                                0.25,
+                                0.4982
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_7": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.625,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 0.75,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "",
+                "shape": "The object is a two-step block with a rectangular base and a smaller rectangular top. The top is offset to the right of the base, creating a T-shaped structure.",
+                "length": 0.7499999999999999,
+                "width": 0.49999999999999994,
+                "height": 0.625
+            }
+        }
+    }
+}

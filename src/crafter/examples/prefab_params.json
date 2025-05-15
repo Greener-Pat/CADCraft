@@ -44,7 +44,7 @@
             "relationship": {
                 "x": ["left", "intersect"],
                 "y": ["front", "seperate"],
-                "z": ["align", "intersect"]
+                "z": ["none", "intersect"]
             }
         },
         {
@@ -53,7 +53,7 @@
             "relationship": {
                 "x": ["right", "intersect"],
                 "y": ["front", "seperate"],
-                "z": ["align", "intersect"]
+                "z": ["none", "intersect"]
             }
         },
         {
@@ -62,7 +62,7 @@
             "relationship": {
                 "x": ["left", "intersect"],
                 "y": ["back", "seperate"],
-                "z": ["align", "intersect"]
+                "z": ["none", "intersect"]
             }
         },
         {
@@ -71,7 +71,7 @@
             "relationship": {
                 "x": ["right", "intersect"],
                 "y": ["back", "seperate"],
-                "z": ["align", "intersect"]
+                "z": ["none", "intersect"]
             }
         }
     ]

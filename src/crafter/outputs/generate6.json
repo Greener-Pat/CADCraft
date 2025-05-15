@@ -1,0 +1,526 @@
+{
+    "final_name": "a boy with a round head and cubic arms, body and legs",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                -0.5,
+                                -0.5
+                            ],
+                            "End Point": [
+                                0.5,
+                                -0.5
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.5,
+                                -0.5
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.5
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.5,
+                                0.5
+                            ],
+                            "End Point": [
+                                -0.5,
+                                0.5
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                -0.5,
+                                0.5
+                            ],
+                            "End Point": [
+                                -0.5,
+                                -0.5
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 1.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Cubic Body at the Center",
+                "shape": "A cube with side length 1.0",
+                "length": 1.0,
+                "width": 1.0,
+                "height": 1.0
+            }
+        },
+        "part_2": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                1.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.5
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                },
+                "face_2": {
+                    "loop_1": {
+                        "arc_1": {
+                            "Start Point": [
+                                0.5,
+                                0.0
+                            ],
+                            "Mid Point": [
+                                0.5,
+                                0.25
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.5
+                            ]
+                        },
+                        "line_1": {
+                            "Start Point": [
+                                0.5,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.3,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Round Head on Top of the Body",
+                "shape": "A rectangular prism with a round head on top",
+                "length": 1.0,
+                "width": 0.5,
+                "height": 0.3,
+                "radius": 0.25
+            }
+        },
+        "part_3": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    -0.3,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                1.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.5
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                },
+                "face_2": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                -0.5
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.0,
+                                -0.5
+                            ],
+                            "End Point": [
+                                1.0,
+                                -0.5
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                -0.5
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.3,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Left Cubic Arm",
+                "shape": "A cubic arm with length 1.0, width 0.5 and height 0.3",
+                "length": 1.0,
+                "width": 0.5,
+                "height": 0.3
+            }
+        },
+        "part_4": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.3,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                1.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                1.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.0,
+                                1.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 1.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Right Cubic Arm",
+                "shape": "A cubic arm with length 1.0, width 1.0 and height 1.0",
+                "length": 1.0,
+                "width": 1.0,
+                "height": 1.0
+            }
+        },
+        "part_5": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    -0.15,
+                    -0.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                1.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.5
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.5
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                0.0,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.3,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Left Cubic Leg Below the Body",
+                "shape": "A cubic leg with length 1.0, width 0.5 and height 0.3",
+                "length": 1.0,
+                "width": 0.5,
+                "height": 0.3
+            }
+        },
+        "part_6": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.15,
+                    -0.5,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "line_1": {
+                            "Start Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                1.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.0,
+                                1.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                1.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                1.0,
+                                1.0
+                            ],
+                            "End Point": [
+                                1.0,
+                                0.0
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                1.0,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 1.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Right Cubic Leg",
+                "shape": "A right cubic leg with length 1.0, width 1.0 and height 1.0",
+                "length": 1.0,
+                "width": 1.0,
+                "height": 1.0
+            }
+        }
+    }
+}
