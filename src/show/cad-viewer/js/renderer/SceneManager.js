@@ -478,7 +478,7 @@ export class SceneManager {
             mesh.rotation.z += rz;
         }
 
-        console.log('applytranform\'s mesh rotation is ', mesh.rotation);
+        // console.log('applytranform\'s mesh rotation is ', mesh.rotation);
 
     }
 }
