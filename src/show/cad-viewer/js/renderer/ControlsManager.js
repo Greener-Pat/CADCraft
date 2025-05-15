@@ -19,6 +19,7 @@ export class ControlsManager {
         this.isDragging = false;
         this.dragAxis = null;
         this.dragStartPosition = new THREE.Vector3();
+        this.dragStartPosition1 = new THREE.Vector3();
         this.dragStartMousePosition = new THREE.Vector2();
         this.dragScale = 0.01; // 鼠标移动到对象移动的比例尺
         
@@ -247,6 +248,7 @@ export class ControlsManager {
         this.dragAxis = axis;
         this.isDragging = true;
         this.dragStartPosition.copy(this.gizmoLast.get(object.uuid) || object.position);
+        this.dragStartPosition1.copy(object.position);
         this.dragStartMousePosition.set(mouseX, mouseY);
         
         // 禁用轨道控制器
@@ -273,10 +275,7 @@ export class ControlsManager {
         else if (this.dragAxis === 'z') axisVector.set(0, 0, 1);
         
         // 将轴向量从世界坐标转换为屏幕坐标
-        const startPoint = object.position.clone();
-        if (this.gizmoLast.has(object.uuid)) {
-            startPoint.copy(this.gizmoLast.get(object.uuid));
-        }
+        const startPoint = this.dragStartPosition.clone();
         const endPoint = startPoint.clone().add(axisVector);
         
         // 将这两个点投影到屏幕上
@@ -297,8 +296,6 @@ export class ControlsManager {
         
         // 计算鼠标移动在轴方向上的投影长度(点积)
         let mouseDelta = mouseMove.dot(screenAxisVector) * this.dragScale;
-
-        if (mouseDelta == 0) return 0;
         
         // 【1. 计算对象移动 - 应用旋转】
         // 创建世界轴移动向量
@@ -325,7 +322,7 @@ export class ControlsManager {
         const localMoveVector = worldMoveVector.clone().applyMatrix3(inverseRotationMatrix);
 
         // 计算对象的新位置 - 使用原始位置加上局部移动向量
-        const objectNewPosition = object.position.clone().add(localMoveVector);
+        const objectNewPosition = this.dragStartPosition1.clone().add(localMoveVector);
         
         // 【2. 计算箭头移动 - 不应用旋转】
         // 计算箭头的新位置 - 简单地沿世界轴移动
