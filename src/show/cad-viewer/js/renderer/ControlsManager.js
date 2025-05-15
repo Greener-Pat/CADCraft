@@ -278,9 +278,6 @@ export class ControlsManager {
             startPoint.copy(this.gizmoLast.get(object.uuid));
         }
         const endPoint = startPoint.clone().add(axisVector);
-
-        console.log('object is ', object.uuid);
-        console.log('startPoint is ', startPoint);
         
         // 将这两个点投影到屏幕上
         const startScreenPos = startPoint.clone().project(camera);
@@ -313,15 +310,19 @@ export class ControlsManager {
         // 获取对象的旋转矩阵
         object.updateMatrixWorld(true);
         const rotationMatrix = new THREE.Matrix4().extractRotation(object.matrixWorld);
-        const inverseRotationMatrix = rotationMatrix.clone().invert();
+
+        // 清理逆天浮点数
+        for (let i = 0; i < 16; i++) {
+            if (Math.abs(rotationMatrix.elements[i]) < 1e-10)
+                rotationMatrix.elements[i] = 0;
+        }
+
+        // 选择旋转矩阵的3x3子矩阵
+        const rotationMatrix3 = new THREE.Matrix3().setFromMatrix4(rotationMatrix);
+        const inverseRotationMatrix = rotationMatrix3.clone().invert();
         
         // 将世界移动向量转换为对象局部空间中的移动向量
-        const tmplocalMoveVector = worldMoveVector.clone().applyMatrix4(inverseRotationMatrix);
-        const mouseLen = tmplocalMoveVector.dot(axisVector);
-        const localMoveVector = tmplocalMoveVector.clone().multiplyScalar(mouseDelta / mouseLen);
-
-        console.log('worldMoveVector is ', worldMoveVector);
-        console.log('localMoveVector is ', localMoveVector);
+        const localMoveVector = worldMoveVector.clone().applyMatrix3(inverseRotationMatrix);
 
         // 计算对象的新位置 - 使用原始位置加上局部移动向量
         const objectNewPosition = object.position.clone().add(localMoveVector);
@@ -329,7 +330,6 @@ export class ControlsManager {
         // 【2. 计算箭头移动 - 不应用旋转】
         // 计算箭头的新位置 - 简单地沿世界轴移动
         const gizmoNewPosition = startPoint.clone();
-        // console.log('更新拖拽位置', objectNewPosition, gizmoNewPosition);
         gizmoNewPosition[this.dragAxis] += mouseDelta;
         
         // 应用边界限制
@@ -339,27 +339,20 @@ export class ControlsManager {
         gizmoNewPosition.y = Math.max(vertical.min, Math.min(vertical.max, gizmoNewPosition.y));
         gizmoNewPosition.x = Math.max(horizontal.min, Math.min(horizontal.max, gizmoNewPosition.x));
         gizmoNewPosition.z = Math.max(horizontal.min, Math.min(horizontal.max, gizmoNewPosition.z));
-        
-        objectNewPosition.copy(gizmoNewPosition.clone().applyMatrix(inverseRotationMatrix));
 
         // 对象边界限制
         objectNewPosition.y = Math.max(vertical.min, Math.min(vertical.max, objectNewPosition.y));
         objectNewPosition.x = Math.max(horizontal.min, Math.min(horizontal.max, objectNewPosition.x));
         objectNewPosition.z = Math.max(horizontal.min, Math.min(horizontal.max, objectNewPosition.z));
         
-        
         // 更新对象位置
         object.position.copy(objectNewPosition);
-        
-        console.log('object position is ', object.position);
 
         // 直接更新箭头位置，不使用updateGizmoPosition避免其他处理
         if (this.gizmo) {
-            this.gizmo.position.copy(gizmoNewPosition);
+            this.gizmo.position.copy(gizmoNewPosition.clone());
             this.gizmoLast.set(object.uuid, gizmoNewPosition.clone());
-            // console.log('[updatedrag]: gizmo position is ', gizmoNewPosition);
         }
-
         
         // 计算实际移动距离
         const distance = localMoveVector.length();
@@ -392,14 +385,6 @@ export class ControlsManager {
             
             // 重新启用轨道控制器
             this.renderer.sceneManager.controls.enabled = true;
-            
-            // 【关键修改】直接设置箭头位置与对象位置相同，不应用任何旋转
-            if (this.gizmo) {
-                // 直接设置位置，不调用updateGizmoPosition
-                this.gizmo.position.copy(this.gizmoLast.get(object.uuid) || object.position);
-                // this.gizmo.position.copy(this.gizmoLast.get(object.uuid));
-                // console.log('[enddrag]: gizmo position is ', object.position);
-            }
             
             // 重置拖拽相关属性
             this.dragAxis = null;
@@ -456,13 +441,6 @@ export class ControlsManager {
             this.gizmo.visible = false;
         }
     }
-    
-    // // 更新控制手柄位置
-    // updateGizmoPosition(object) {
-    //     if (object && this.gizmo) {
-    //         this.gizmo.position.copy(object.position);
-    //     }
-    // }
     
     // 检查是否点击了箭头，返回轴向
     checkArrowIntersection(raycaster) {
