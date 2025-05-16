@@ -1,12 +1,13 @@
-from json_op import load_json, json_generate
+import time
 import clip
+from json_op import load_json, json_generate
 
 # Direct Generate
 def whole_generate(desire):
 	example = load_json('../examples/simple.json', dump=True)
 	prompt = example + f"请按照如上给出的minimal_json格式生成一个{desire}的CAD程序。" + \
 		"严格按照示例，主体包含'coordinate_system'，'extrusion'，以及'sketch'字段。" + \
-		"'sketch'字段中用face描述面，face中用loop描述构成面的线，loop中只支持arc, line, circle三种。" + \
+		"'sketch'字段中用face描述面，face中用loop描述构成面的线，loop中只支持arc, line, circle三种，命名形如arc_1, line_2, circle_3。" + \
 		"这里的点全部用'Start Point'，'Mid Point'，'End Point'字段描述，line需要start和end，arc需要start, mid end，对应的是B-ref曲线。" + \
 		"circle需要'Center'和'Radius'两个子字段"
 	return json_generate(prompt)
@@ -43,7 +44,7 @@ def component_generate(shape):
 	example = load_json('../basics/cuboid.json', dump=True)
 	prompt = example + f"请按照上述minimal_json的格式生成一个'{shape}'的CAD程序。" + \
 		"严格按照示例，包含'coordinate_system'，'extrusion'，以及'sketch'字段。" + \
-		"'sketch'字段中用face描述面，face中用loop描述构成面的线，loop中只支持arc, line, circle三种。" + \
+		"'sketch'字段中用face描述面，face中用loop描述构成面的线，loop中只支持arc, line, circle三种，命名形如arc_1, line_2, circle_3" + \
 		"这里的点全部用'Start Point'，'Mid Point'，'End Point'字段描述，line需要start和end，arc需要start, mid end，对应的是B-ref曲线。" + \
 		"circle需要'Center'和'Radius'两个子字段" +\
 		f"请按照上述minimal_json的格式生成一个'{shape}'的CAD程序。"
@@ -117,10 +118,15 @@ def component_prefab(type, params):
 ## Merge
 
 def get_shape(obj_dic):
-    length = obj_dic['description']['length']
-    width = obj_dic['description']['width']
-    height = obj_dic['description']['height']
-    return [length, width, height]
+	if 'lenght' in obj_dic['description']:
+		length = obj_dic['description']['length']
+		width = obj_dic['description']['width']
+	else:
+		length = obj_dic['description']['radius']
+		width = obj_dic['description']['radius']
+
+	height = obj_dic['description']['height']
+	return [length, width, height]
 
 def axis_compute(base_val, ex_val, base_size, ex_size, relative):
 	if relative[0] in ['left', 'front', 'down']:
@@ -177,6 +183,8 @@ def merge_gene(parts_dic, merge):
 			cad_dic['coordinate_system']['Translation Vector'] = position
 		final_parts[f'part_{part_count + 1}'] = cad_dic
 		part_count += 1
+		if part_count % 3 == 0:
+			time.sleep(40)
 	if merge == "hand":
 		# convert 'to' to list
 		for item in parts_dic['positional relationship']:

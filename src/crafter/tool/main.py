@@ -3,10 +3,10 @@ from json_op import available_path, save_json
 
 def interface():
     # dumb interface
-    desire = "一根竖直的杆子，由五个同轴不同半径的圆柱体组成，圆柱面上下对齐拼接但相互不相交"
+    desire = "一根竖直的杆子，由三个同轴不同半径的圆柱体组成，圆柱面上下对齐拼接但相互不相交"
     whole = False
-    div = "clip"
-    merge = "hand"
+    div = "gene"        # gene / clip / prefabs
+    merge = "hand"      # params / hand
     return desire, whole, div, merge
 
 if __name__ == "__main__":
