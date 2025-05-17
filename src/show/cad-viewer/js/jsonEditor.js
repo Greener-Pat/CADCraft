@@ -196,10 +196,22 @@ export class JsonEditor {
         showLoading('应用JSON更改');
         updateProgress(30);
         
+        // 【新增】销毁旧的controlsManager
+        if (this.renderer && this.renderer.controlsManager) {
+          console.log('销毁旧的控制管理器');
+          this.renderer.controlsManager.dispose();
+        }
+        
+        updateProgress(40);
+        
         // 调用渲染器重新渲染模型
         if (this.renderer) {
-          updateProgress(50);
+          updateProgress(60);
+          
+          updateProgress(80);
+          
           this.renderer.renderCADFromJson(updatedJson);
+
           updateProgress(90);
           
           // 更新模型信息
@@ -225,4 +237,4 @@ export class JsonEditor {
         hideLoading();
       }
     }
-  }
+}

@@ -134,7 +134,7 @@ export class GeometryFactory {
     
     // 从B-rep格式创建几何体
     createFromBRep(sketchData, extrusion) {
-        console.log('Processing B-rep format data:', { sketch: sketchData, extrusion });
+        // console.log('Processing B-rep format data:', { sketch: sketchData, extrusion });
         try {
             // 确保extrusion有效
             if (!extrusion) {
@@ -152,7 +152,7 @@ export class GeometryFactory {
     }
     
    
-    // 从复杂草图创建几何体 - 使用 CSG 布尔运算解决重合边界问题
+    // 从复杂草图创建几何体 - 修正版本
     createFromComplexSketch(sketchData, extrusion) {
         // 调试输出
         console.log('处理复杂草图:', { sketchData, extrusion });
@@ -161,6 +161,9 @@ export class GeometryFactory {
             // 创建一个网格组来存放所有面
             const group = new THREE.Group();
             group.isGroup = true;
+            
+            // 【新增】用于存储所有顶点坐标的数组
+            let allVertices = [];
             
             // 处理每个面
             for (const faceKey in sketchData) {
@@ -188,6 +191,12 @@ export class GeometryFactory {
                         // 创建圆锥/圆柱体
                         const coneMesh = this.createConeFromData(coneData, extrusion);
                         if (coneMesh) {
+                            // 【新增】收集圆锥体的顶点
+                            coneMesh.geometry.computeBoundingBox();
+                            const coneCenter = new THREE.Vector3();
+                            coneMesh.geometry.boundingBox.getCenter(coneCenter);
+                            allVertices.push(coneCenter);
+                            
                             group.add(coneMesh);
                             console.log('成功创建圆锥/圆柱体');
                         }
@@ -198,8 +207,6 @@ export class GeometryFactory {
                 // 如果这个面已经作为圆锥处理，继续下一个面
                 if (hasCone) continue;
                 
-                // 以下是原有代码的普通几何体处理...
-                
                 // 如果只有一个环（无孔洞），直接处理
                 if (loopKeys.length === 1) {
                     const loop = face[loopKeys[0]];
@@ -208,6 +215,12 @@ export class GeometryFactory {
                     if (shape) {
                         const mesh = this.createExtrudedMesh(shape, extrusion);
                         if (mesh) {
+                            // 【新增】收集网格的顶点
+                            mesh.geometry.computeBoundingBox();
+                            const meshCenter = new THREE.Vector3();
+                            mesh.geometry.boundingBox.getCenter(meshCenter);
+                            allVertices.push(meshCenter);
+                            
                             group.add(mesh);
                         }
                     }
@@ -233,6 +246,12 @@ export class GeometryFactory {
                 
                 const mainGeometry = new THREE.ExtrudeGeometry(mainShape, mainExtrudeSettings);
                 this.applyTransforms(mainGeometry, extrusion);
+                
+                // 【新增】收集主体几何体顶点
+                mainGeometry.computeBoundingBox();
+                const mainCenter = new THREE.Vector3();
+                mainGeometry.boundingBox.getCenter(mainCenter);
+                allVertices.push(mainCenter);
                 
                 // 创建主体网格
                 const mainMaterial = new THREE.MeshPhongMaterial({ 
@@ -273,6 +292,12 @@ export class GeometryFactory {
                 
                 // 添加最终网格到组
                 if (resultMesh) {
+                    // 【新增】收集结果网格的顶点
+                    resultMesh.geometry.computeBoundingBox();
+                    const resultCenter = new THREE.Vector3();
+                    resultMesh.geometry.boundingBox.getCenter(resultCenter);
+                    allVertices.push(resultCenter);
+                    
                     group.add(resultMesh);
                     console.log(`成功创建带有 ${loopKeys.length - 1} 个孔洞的 CSG 网格`);
                 }
@@ -282,6 +307,45 @@ export class GeometryFactory {
             if (group.children.length === 0) {
                 console.warn('未能从B-rep创建任何有效网格');
                 return this.createFallbackMesh(extrusion);
+            }
+            
+            // 【新增】计算所有顶点的平均位置作为group的position
+            if (allVertices.length > 0) {
+                const centerPosition = new THREE.Vector3();
+                
+                // 计算所有中心点的平均值
+                allVertices.forEach(vertex => {
+                    centerPosition.add(vertex);
+                });
+                centerPosition.divideScalar(allVertices.length);
+                
+                // 设置组的位置
+                group.position.copy(centerPosition);
+                
+                // 调整子对象的位置，使其相对于组位置
+                group.children.forEach(child => {
+                    // 如果子对象有几何体
+                    if (child.geometry) {
+                        // 创建一个变换矩阵，将顶点移动回相对位置
+                        const translateMatrix = new THREE.Matrix4().makeTranslation(
+                            -centerPosition.x,
+                            -centerPosition.y,
+                            -centerPosition.z
+                        );
+                        
+                        // 应用变换矩阵到几何体
+                        child.geometry.applyMatrix4(translateMatrix);
+                        
+                        // 确保子对象自己的position为0
+                        child.position.set(0, 0, 0);
+                    }
+                });
+                
+                // 更新矩阵
+                group.updateMatrix();
+                group.updateMatrixWorld(true);
+                
+                console.log('设置了网格组位置:', centerPosition);
             }
             
             return group;
@@ -601,7 +665,7 @@ export class GeometryFactory {
         while (sortedEdges.length < edges.length) {
             let foundNext = false;
 
-            console.log('current edges are:', sortedEdges)
+            // console.log('current edges are:', sortedEdges)
             
             for (let i = 0; i < edges.length; i++) {
                 if (usedIndices.has(i)) continue;
