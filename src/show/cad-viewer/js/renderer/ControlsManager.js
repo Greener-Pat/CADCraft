@@ -19,7 +19,7 @@ export class ControlsManager {
         this.isDragging = false;
         this.dragAxis = null;
         this.dragStartPosition = new THREE.Vector3();
-        this.dragStartPosition1 = new THREE.Vector3();
+        this.dragStartObjPosition = new THREE.Vector3();
         this.dragStartMousePosition = new THREE.Vector2();
         this.dragScale = 0.01; // 鼠标移动到对象移动的比例尺
         
@@ -217,7 +217,14 @@ export class ControlsManager {
         if (!this.gizmo || !object) return;
         
         // 更新位置
-        this.gizmo.position.copy(this.gizmoLast.get(object.uuid) || object.position);
+        if (!this.gizmoLast.has(object.uuid)) {
+            object.updateMatrix();
+            object.updateMatrixWorld(true);
+            const translateVector = new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+            this.gizmoLast.set(object.uuid, translateVector.clone().add(object.position));
+            // console.log('object position is', object);
+        }
+        this.gizmo.position.copy(this.gizmoLast.get(object.uuid));
 
         // 更新尺寸
         this.updateGizmoScale(object);
@@ -247,8 +254,8 @@ export class ControlsManager {
         
         this.dragAxis = axis;
         this.isDragging = true;
-        this.dragStartPosition.copy(this.gizmoLast.get(object.uuid) || object.position);
-        this.dragStartPosition1.copy(object.position);
+        this.dragStartPosition.copy(this.gizmoLast.get(object.uuid) || object.postion);
+        this.dragStartObjPosition.copy(object.position);
         this.dragStartMousePosition.set(mouseX, mouseY);
         
         // 禁用轨道控制器
@@ -296,8 +303,21 @@ export class ControlsManager {
         
         // 计算鼠标移动在轴方向上的投影长度(点积)
         let mouseDelta = mouseMove.dot(screenAxisVector) * this.dragScale;
+
+        const gizmoNewPosition = startPoint.clone();
+        gizmoNewPosition[this.dragAxis] += mouseDelta;
         
-        // 【1. 计算对象移动 - 应用旋转】
+        // 应用边界限制
+        const { horizontal, vertical } = this.renderer.dragLimits;
+        
+        // 箭头边界限制
+        gizmoNewPosition.y = Math.max(vertical.min, Math.min(vertical.max, gizmoNewPosition.y));
+        gizmoNewPosition.x = Math.max(horizontal.min, Math.min(horizontal.max, gizmoNewPosition.x));
+        gizmoNewPosition.z = Math.max(horizontal.min, Math.min(horizontal.max, gizmoNewPosition.z));
+
+        // 修正移动幅度
+        mouseDelta = gizmoNewPosition[this.dragAxis] - startPoint[this.dragAxis];
+        
         // 创建世界轴移动向量
         const worldMoveVector = new THREE.Vector3();
         if (this.dragAxis === 'x') worldMoveVector.set(mouseDelta, 0, 0);
@@ -322,26 +342,8 @@ export class ControlsManager {
         const localMoveVector = worldMoveVector.clone().applyMatrix3(inverseRotationMatrix);
 
         // 计算对象的新位置 - 使用原始位置加上局部移动向量
-        const objectNewPosition = this.dragStartPosition1.clone().add(localMoveVector);
-        
-        // 【2. 计算箭头移动 - 不应用旋转】
-        // 计算箭头的新位置 - 简单地沿世界轴移动
-        const gizmoNewPosition = startPoint.clone();
-        gizmoNewPosition[this.dragAxis] += mouseDelta;
-        
-        // 应用边界限制
-        const { horizontal, vertical } = this.renderer.dragLimits;
-        
-        // 箭头边界限制
-        gizmoNewPosition.y = Math.max(vertical.min, Math.min(vertical.max, gizmoNewPosition.y));
-        gizmoNewPosition.x = Math.max(horizontal.min, Math.min(horizontal.max, gizmoNewPosition.x));
-        gizmoNewPosition.z = Math.max(horizontal.min, Math.min(horizontal.max, gizmoNewPosition.z));
+        const objectNewPosition = this.dragStartObjPosition.clone().add(localMoveVector);
 
-        // 对象边界限制
-        objectNewPosition.y = Math.max(vertical.min, Math.min(vertical.max, objectNewPosition.y));
-        objectNewPosition.x = Math.max(horizontal.min, Math.min(horizontal.max, objectNewPosition.x));
-        objectNewPosition.z = Math.max(horizontal.min, Math.min(horizontal.max, objectNewPosition.z));
-        
         // 更新对象位置
         object.position.copy(objectNewPosition);
 
@@ -467,5 +469,11 @@ export class ControlsManager {
         }
         
         return null;
+    }
+
+    // 清理资源方法
+    dispose() {
+        this.gizmoLast.clear();
+        console.log('控制管理器已销毁');
     }
 }

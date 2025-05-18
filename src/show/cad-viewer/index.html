@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 导入自定义样式 -->
     <link rel="stylesheet" href="css/styles.css">
+    <!-- 导入模型生成样式 -->
+    <link rel="stylesheet" href="css/model-generator.css">
     <script type="importmap">
         {
           "imports": {
@@ -102,6 +104,60 @@
             <div class="resize-handle" id="sidebarResizeHandle">
                 <div class="handle-indicator"></div>
             </div>
+
+            <!-- 模型生成区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>模型生成</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="model-generator">
+                        <label for="modelDescription">描述您想生成的模型:</label>
+                        <textarea id="modelDescription" placeholder="例如: 一根竖直的杆子，由三个同轴不同半径的圆柱体组成，圆柱面上下对齐拼接但相互不相交"></textarea>
+                        
+                        <div class="generation-methods">
+                            <h4>生成方式:</h4>
+                            <!-- 整体生成按钮 -->
+                            <button id="genWhole" class="action-button generation-btn whole">
+                                <i class="fa-solid fa-cube"></i> 整体生成
+                            </button>
+                            
+                            <h4>拼接生成:</h4>
+                            <div class="generation-grid">
+                                <!-- 基因分割 -->
+                                <button id="genGeneParams" class="action-button generation-btn">
+                                    gene<br>+<br>params
+                                </button>
+                                <button id="genGeneHand" class="action-button generation-btn">
+                                    gene<br>+<br>hand
+                                </button>
+                                
+                                <!-- CLIP分割 -->
+                                <button id="genClipParams" class="action-button generation-btn">
+                                    CLIP<br>+<br>params
+                                </button>
+                                <button id="genClipHand" class="action-button generation-btn">
+                                    CLIP<br>+<br>hand
+                                </button>
+                                
+                                <!-- 预制件分割 -->
+                                <button id="genPrefabsParams" class="action-button generation-btn">
+                                    prefabs<br>+<br>hand
+                                </button>
+                                <button id="genPrefabsHand" class="action-button generation-btn">
+                                    prefabs<br>+<br>hand
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="generationStatus" class="status-message"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 文件操作区块 - 可折叠功能 -->
             <div class="sidebar-section">
                 <div class="section-header">
@@ -349,5 +405,6 @@
     
     <!-- 主入口脚本 -->
     <script type="module" src="js/main.js"></script>
+    <script src="js/model-generator.js"></script>
 </body>
 </html>
