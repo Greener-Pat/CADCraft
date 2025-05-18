@@ -30,6 +30,11 @@
             "id": 6,
             "description": "A gate whose direct view image is a rectangular",
             "position": [0.25, 0.0, 0.0]
+        },
+        "part_7": {
+            "id": 7,
+            "description": "A cuboid house on the main body of castle",
+            "position": [0.5, 0.5, 1.0]
         }
     },
     "positional relationship": [
@@ -76,6 +81,15 @@
                 "x": ["center", "intersect"],
                 "y": ["front", "intersect"],
                 "z": ["none", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 7,
+            "relationship": {
+                "x": ["center", "intersect"],
+                "y": ["center", "intersect"],
+                "z": ["up", "seperate"]
             }
         }
     ]

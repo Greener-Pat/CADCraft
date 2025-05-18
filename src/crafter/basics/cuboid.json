@@ -1,43 +1,41 @@
 {
-    "part_1": {
-        "coordinate_system": {
-            "Euler Angles": [0.0, 0.0, 0.0],
-            "Translation Vector": [0.0, 0.0, 0.0]
-        },
-        "sketch": {
-            "face_1": {
-                "loop_1": {
-                    "line_1": {
-                        "Start Point": [0.0, 0.0],
-                        "End Point": [1.0, 0.0]
-                    },
-                    "line_2": {
-                        "Start Point": [1.0, 0.0],
-                        "End Point": [1.0, 0.5]
-                    },
-                    "line_3": {
-                        "Start Point": [1.0, 0.5],
-                        "End Point": [0.0, 0.5]
-                    },
-                    "line_4": {
-                        "Start Point": [0.0, 0.5],
-                        "End Point": [0.0, 0.0]
-                    }
+    "coordinate_system": {
+        "Euler Angles": [0.0, 0.0, 0.0],
+        "Translation Vector": [0.0, 0.0, 0.0]
+    },
+    "sketch": {
+        "face_1": {
+            "loop_1": {
+                "line_1": {
+                    "Start Point": [0.0, 0.0],
+                    "End Point": [1.0, 0.0]
+                },
+                "line_2": {
+                    "Start Point": [1.0, 0.0],
+                    "End Point": [1.0, 0.5]
+                },
+                "line_3": {
+                    "Start Point": [1.0, 0.5],
+                    "End Point": [0.0, 0.5]
+                },
+                "line_4": {
+                    "Start Point": [0.0, 0.5],
+                    "End Point": [0.0, 0.0]
                 }
             }
-        },
-        "extrusion": {
-            "extrude_depth_towards_normal": 0.3,
-            "extrude_depth_opposite_normal": 0.0,
-            "sketch_scale": 1.0,
-            "operation": "NewBodyFeatureOperation"
-        },
-        "description": {
-            "name": "Cuboid",
-            "shape": "A rectangular prism with length 1.0, width 0.5 and height 0.3",
-            "length": 1.0,
-            "width": 0.5,
-            "height": 0.3
         }
+    },
+    "extrusion": {
+        "extrude_depth_towards_normal": 0.3,
+        "extrude_depth_opposite_normal": 0.0,
+        "sketch_scale": 1.0,
+        "operation": "NewBodyFeatureOperation"
+    },
+    "description": {
+        "name": "Cuboid",
+        "shape": "A rectangular prism with length 1.0, width 0.5 and height 0.3",
+        "length": 1.0,
+        "width": 0.5,
+        "height": 0.3
     }
 }
