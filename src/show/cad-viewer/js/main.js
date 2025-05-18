@@ -689,6 +689,63 @@ function handleFileUpload(event) {
     reader.readAsText(file);
 }
 
+// 从路径加载模型函数 保证点击之后会自动加载渲染好的cad模型
+window.loadModelFromPath = function(path) {
+    // 显示加载状态
+    updateStatus('正在从服务器获取模型');
+    showLoading(`加载模型: ${path.split('/').pop()}`);
+    updateProgress(10);
+
+    // 使用fetch从服务器获取文件
+    fetch(path)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`网络响应错误 (${response.status})`);
+            }
+            updateProgress(40);
+            return response.json();
+        })
+        .then(data => {
+            updateStatus('正在解析模型格式');
+            updateProgress(60);
+            
+            // 检测JSON格式类型
+            let modelType = "未知";
+            if (data.assembly && data.assembly.components) {
+                modelType = "标准CAD格式";
+            } else if (data.parts || data.final_name) {
+                modelType = "B-rep格式";
+            } else {
+                throw new Error("无法识别的模型格式");
+            }
+            
+            updateStatus(`正在渲染${modelType}模型`);
+            updateProgress(70);
+            
+            // 保存模型数据并渲染
+            currentModelData = data;
+            renderer.renderCADFromJson(data);
+            
+            // 更新模型信息 - 会自动判断格式
+            updateModelInfo(data);
+            
+            // 更新JSON编辑器内容
+            if (jsonEditor) {
+                jsonEditor.setJson(data);
+            }
+            
+            updateProgress(100);
+            updateStatus(`${modelType}模型加载完成，点击模型查看控制手柄`);
+            setTimeout(hideLoading, 500);
+        })
+        .catch(error => {
+            updateStatus('模型加载错误: ' + error.message);
+            console.error("模型加载错误:", error);
+            alert('模型加载错误: ' + error.message);
+            hideLoading();
+        });
+};
+
 // 更新调整侧边栏大小的逻辑
 function initResizableSidebar() {
     const appContainer = document.querySelector('.app-container');
