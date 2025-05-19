@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { updateStatus } from '../utils/StatusManager.js';
 
 export class ControlsManager {
-    constructor(renderer) {
+    constructor(renderer, jsonEditor) {
         this.renderer = renderer;
+        this.jsonEditor = jsonEditor;
         
         this.gizmoLast = new Map();
 
@@ -353,6 +354,8 @@ export class ControlsManager {
             this.gizmoLast.set(object.uuid, gizmoNewPosition.clone());
         }
         
+        this.updatePartTranslation(object);
+
         // 计算实际移动距离
         const distance = localMoveVector.length();
         
@@ -475,5 +478,90 @@ export class ControlsManager {
     dispose() {
         this.gizmoLast.clear();
         console.log('控制管理器已销毁');
+    }
+
+    // 【新增】更新JSON中部件的Translation Vector
+    updatePartTranslation(object) {
+        // 确保有JSON编辑器和对象
+        if (!this.jsonEditor || !object || !this.dragAxis) return;
+        
+        try {
+            // 节流更新 - 避免每一个微小移动都更新
+            if (this._jsonUpdateTimeout) {
+                clearTimeout(this._jsonUpdateTimeout);
+            }
+            
+            this._jsonUpdateTimeout = setTimeout(() => {
+                // 获取当前编辑器内容
+                const jsonContent = this.jsonEditor.getEditorContent();
+                const jsonData = JSON.parse(jsonContent);
+                
+                // 获取部件ID - 通常存储在userData中
+                const partId =  this.renderer.getPartIdFromObject(object);
+        
+                // 在parts对象中查找匹配的部件
+                if (jsonData.parts) {
+                    // 遍历parts查找匹配项
+                    let found = false;
+                    let partKey = '';
+                    
+                    if (jsonData.parts[partId]) {
+                        partKey = partId;
+                        found = true;
+                    }
+                    
+                    // 如果找到匹配部件，更新其Translation Vector
+                    if (found && partKey) {
+                        const part = jsonData.parts[partKey];
+                        
+                        // 确保有coordinate_system字段
+                        if (!part.coordinate_system) {
+                            part.coordinate_system = {};
+                        }
+                        if (!part.coordinate_system["Translation Vector"]) {
+                            part.coordinate_system["Translation Vector"] = [0.0, 0.0, 0.0];
+                        }
+                        
+                        // 更新特定轴的值
+                        const axisIndex = {x: 0, y: 2, z: 1}[this.dragAxis];
+                        const roundedValue = Math.round(object.position[this.dragAxis] * 1000) / 1000;
+                        
+                        // 只在值有变化时更新
+                        if (part.coordinate_system["Translation Vector"][axisIndex] !== roundedValue) {
+                            part.coordinate_system["Translation Vector"][axisIndex] = roundedValue;
+                            
+                            // 更新编辑器内容
+                            this.updateJsonEditor(jsonData);
+
+                        }
+                    } else {
+                        console.log('未找到与此对象匹配的部件:', object);
+                    }
+                }
+            }, 50); // 50ms防抖
+        } catch (error) {
+            console.warn('更新JSON Translation Vector失败:', error);
+        }
+    }
+
+    // 【新增】更新JSON编辑器
+    updateJsonEditor(jsonData) {
+        if (!this.jsonEditor) return;
+        
+        try {
+            // 格式化JSON
+            const formattedJson = JSON.stringify(jsonData, null, 2);
+            
+            // 暂存滚动位置
+            const scrollInfo = this.jsonEditor.editor.getScrollInfo();
+            
+            // 静默更新编辑器内容
+            this.jsonEditor.editor.operation(() => {
+                this.jsonEditor.editor.setValue(formattedJson);
+                this.jsonEditor.editor.scrollTo(scrollInfo.left, scrollInfo.top);
+            });
+        } catch (error) {
+            console.warn('更新JSON编辑器失败:', error);
+        }
     }
 }

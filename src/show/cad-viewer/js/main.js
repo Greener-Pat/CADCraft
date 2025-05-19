@@ -29,8 +29,7 @@ async function initApp() {
     // 将渲染器保存到全局变量，以便主题管理工具能够访问
     window.renderer = renderer;
     
-    jsonEditor = new JsonEditor();
-    jsonEditor.setRenderer(renderer);
+    jsonEditor = renderer.jsonEditor;
 
     // 加载主题首选项
     loadThemePreference();

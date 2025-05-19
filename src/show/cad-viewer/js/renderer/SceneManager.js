@@ -265,6 +265,7 @@ export class SceneManager {
     renderFromJson(data) {
         updateStatus('清除现有模型，开始渲染');
         this.clearCADObjects();
+        this.renderer.objectPartMap.clear();
         
         // 检测JSON格式
         if (data.assembly && data.assembly.components) {
@@ -433,8 +434,7 @@ export class SceneManager {
             }
             
             // 保存组件ID和其他数据
-            mesh.userData.componentId = componentId;
-            mesh.userData.type = 'brep';
+            this.renderer.objectPartMap.set(mesh.uuid, componentId);
             
             // 应用变换
             this.applyTransform(mesh, transform);
@@ -477,8 +477,6 @@ export class SceneManager {
             mesh.rotation.y += ry;
             mesh.rotation.z += rz;
         }
-
-        // console.log('applytranform\'s mesh rotation is ', mesh.rotation);
 
     }
 }
