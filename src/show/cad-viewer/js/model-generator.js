@@ -153,11 +153,11 @@ class ModelGenerator {
     loadGeneratedModel(path) {
         // 这里应该调用您现有的加载JSON模型的函数
         // 例如：loadModelFromJSON(path);
-        console.log("应加载模型:", path);
+        console.log("应加载模型:", "D:/Brain/CADCraft/src/crafter/outputs/generate0.json");
         
         // 如果有全局加载函数，可以直接调用
         if (typeof window.loadModelFromPath === 'function') {
-            window.loadModelFromPath(path);
+            window.loadModelFromPath("D:/Brain/CADCraft/src/crafter/outputs/generate0.json");
         }
     }
 }
