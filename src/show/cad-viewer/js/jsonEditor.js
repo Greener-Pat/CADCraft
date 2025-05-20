@@ -318,4 +318,108 @@ export class JsonEditor {
       // 强制一次渲染确保视图更新
       this.renderer.sceneManager.render();
     }
+
+    // 添加以下方法到JsonEditor类
+
+	// 跳转到特定部件ID
+	scrollToPartId(partId) {
+		if (!this.editor || !partId) return false;
+		
+		try {
+			console.log(`尝试在编辑器中定位部件: ${partId}`);
+			
+			// 获取当前内容
+			const content = this.editor.getValue();
+			const lines = content.split('\n');
+			
+			// 查找partId
+			const partPattern = new RegExp(`"${partId}"\\s*:`);
+			
+			// 遍历查找部件位置
+			for (let i = 0; i < lines.length; i++) {
+			if (partPattern.test(lines[i])) {
+				console.log(`找到部件 ${partId} 在第 ${i+1} 行`);
+				
+				// 计算部件的开始和结束行
+				let bracketCount = 0;
+				let startLine = i;
+				let endLine = i;
+				
+				// 找开始的大括号
+				for (let j = i; j < lines.length; j++) {
+				if (lines[j].includes('{')) {
+					break;
+				}
+				}
+				
+				// 寻找部件的结束位置
+				for (let j = i; j < lines.length; j++) {
+				const openBrackets = (lines[j].match(/{/g) || []).length;
+				const closeBrackets = (lines[j].match(/}/g) || []).length;
+				bracketCount += openBrackets - closeBrackets;
+				
+				if (bracketCount === 0 && j > i) {
+					endLine = j;
+					break;
+				}
+				}
+				
+				console.log(`部件 ${partId} 范围: 第 ${startLine+1} 行 到 第 ${endLine+1} 行`);
+				
+				// 展开编辑器区块
+				this.ensureExpanded();
+				
+				// 片刻后操作，确保编辑器完全加载
+				setTimeout(() => {
+				
+				// 滚动到视图中心
+				this.editor.scrollIntoView({line: startLine + 7, ch: 0}, 150);
+				
+				// 高亮显示该部分
+				this.highlightLine(startLine + 7);
+				
+				// 添加状态更新
+				updateStatus(`已定位到部件: ${partId}`);
+				}, 100);
+				
+				return true;
+			}
+			}
+			
+			console.log(`未找到部件 ${partId}`);
+			return false;
+		} catch (error) {
+			console.error('定位JSON部件失败:', error);
+			return false;
+		}
+	}
+
+	// 高亮指定行
+	highlightLine(lineNumber) {
+		if (!this.editor) return;
+		
+		// 清除之前的高亮
+		if (this._currentHighlight) {
+			this._currentHighlight.clear();
+		}
+		
+		// 创建新的高亮
+		this._currentHighlight = this.editor.markText(
+			{line: lineNumber, ch: 0},
+			{line: lineNumber, ch: this.editor.getLine(lineNumber).length},
+			{
+			className: 'json-part-highlight',
+			clearOnEnter: true,
+			css: 'background-color: rgba(65, 105, 225, 0.3); font-weight: bold; border-radius: 3px; padding: 2px 0;'
+			}
+		);
+		
+		// 几秒后自动取消高亮
+		setTimeout(() => {
+			if (this._currentHighlight) {
+			this._currentHighlight.clear();
+			this._currentHighlight = null;
+			}
+		}, 3000);
+	}
 }

@@ -32,6 +32,9 @@ export function toggleTheme() {
         // 更新THREE.js场景背景色
         updateRendererBackground(!isDark);
         
+        // 【新增】更新CodeMirror编辑器主题
+        updateCodeMirrorTheme(!isDark);
+        
         console.log(`已切换到${!isDark ? '暗色' : '亮色'}主题`);
         return !isDark;
     } catch (error) {
@@ -72,10 +75,76 @@ export function loadThemePreference() {
         // 更新THREE.js场景背景色
         updateRendererBackground(isDark);
         
+        // 【新增】更新CodeMirror编辑器主题
+        updateCodeMirrorTheme(isDark);
+        
         return isDark;
     } catch (error) {
         console.error('加载主题偏好失败:', error);
         return false;
+    }
+}
+
+/**
+ * 【新增】更新CodeMirror编辑器主题
+ * @param {boolean} isDark - 是否为暗色主题
+ */
+function updateCodeMirrorTheme(isDark) {
+    try {
+        // 延迟执行以确保编辑器已初始化
+        setTimeout(() => {
+            // 查找所有可能的CodeMirror实例
+            const findEditors = () => {
+                // 直接查找DOM中的CodeMirror实例
+                const cmElements = document.querySelectorAll('.CodeMirror');
+                const editors = [];
+                
+                // 遍历找到的元素
+                cmElements.forEach(el => {
+                    if (el.CodeMirror) {
+                        editors.push(el.CodeMirror);
+                    }
+                });
+                
+                // 检查全局/窗口变量
+                if (window.jsonEditor && window.jsonEditor.editor) {
+                    editors.push(window.jsonEditor.editor);
+                }
+                
+                // 如果找到的编辑器为空，尝试从DOM中获取实例
+                if (editors.length === 0) {
+                    const editorElement = document.getElementById('jsonEditor');
+                    if (editorElement && editorElement.querySelector('.CodeMirror')) {
+                        const cmInstance = editorElement.querySelector('.CodeMirror').CodeMirror;
+                        if (cmInstance) editors.push(cmInstance);
+                    }
+                }
+                
+                return editors;
+            };
+            
+            const editors = findEditors();
+            
+            // 更新所有找到的编辑器实例
+            editors.forEach(editor => {
+                // 设置主题
+                editor.setOption('theme', isDark ? 'dracula' : 'default');
+                
+                // 强制刷新编辑器以应用新主题
+                setTimeout(() => {
+                    editor.refresh();
+                }, 50);
+                
+                console.log(`已更新CodeMirror主题为: ${isDark ? 'dracula' : 'default'}`);
+            });
+            
+            // 如果没有找到编辑器，记录信息
+            if (editors.length === 0) {
+                console.log('没有找到CodeMirror编辑器实例');
+            }
+        }, 100);
+    } catch (error) {
+        console.error('更新CodeMirror主题失败:', error);
     }
 }
 
@@ -113,8 +182,8 @@ export function loadSectionStates() {
     const sections = document.querySelectorAll('.sidebar-section');
     
     sections.forEach(section => {
-        const title = section.querySelector('h3').textContent.trim();
-        if (states[title]) {
+        const title = section.querySelector('h3')?.textContent.trim();
+        if (title && states[title]) {
             section.classList.add('collapsed');
         }
     });
