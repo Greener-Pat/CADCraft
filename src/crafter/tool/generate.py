@@ -263,6 +263,7 @@ def merge_generate(desire, div="clip", merge="params"):
 	if div == "prefabs":
 		parts_dic, res = prefabs_division(desire)
 		if not res:
+			parts_dic = f"Fail to divide the desire shape into small parts, the result has been saved to {parts_dic}"
 			return parts_dic, False
 		print("Merging...")
 		final_dic = merge_prefabs(parts_dic, merge)
@@ -270,6 +271,7 @@ def merge_generate(desire, div="clip", merge="params"):
 		parts_dic, res = gene_division(desire)
 		print("Merging...")
 		if not res:
+			parts_dic = f"Fail to divide the desire shape into small parts, the result has been saved to {parts_dic}"
 			return parts_dic, False
 		if div == "clip":
 			final_dic = merge_clip(parts_dic, merge)

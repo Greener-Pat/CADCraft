@@ -33,9 +33,11 @@ def handle_generation():
         
         if whole:
             final_dic, res = generate.whole_generate(desire)
+            fail_s = f"Fail to generate a whole CAD program, the result has been saved to {final_dic}"
             gen_method = "whole"
         else:
             final_dic, res = generate.merge_generate(desire, div=div, merge=merge)
+            fail_s = final_dic
             gen_method = f"{div}-{merge}"
         
         if res:
@@ -53,7 +55,7 @@ def handle_generation():
             return jsonify({
                 "status": "fail", 
                 "path": None,
-                "message": "Failed to generate model"
+                "message": fail_s
             }), 500
             
     except Exception as e:
