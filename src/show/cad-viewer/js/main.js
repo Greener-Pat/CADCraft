@@ -384,31 +384,62 @@ function mergeShapeIntoCurrentModel(shapeData) {
     updateModelInfo(currentModelData);
 }
 
-// 下载当前模型
+// 下载当前模型 - 优先使用JSONEditor内容
 function downloadCurrentModel() {
-    if (!currentModelData) {
-        updateStatus('没有可下载的模型');
-        alert('当前没有加载任何模型，无法下载。');
-        return;
+    // 检查是否有JSONEditor内容
+    let jsonContent = null;
+    let sourceDescription = '';
+    
+    if (jsonEditor && typeof jsonEditor.getEditorContent === 'function') {
+        const editorContent = jsonEditor.getEditorContent();
+        if (editorContent && editorContent.trim()) {
+            try {
+                // 验证JSON格式
+                JSON.parse(editorContent);
+                jsonContent = editorContent;
+                sourceDescription = 'JSON编辑器';
+            } catch (e) {
+                console.warn('编辑器内容不是有效的JSON，将使用当前模型数据:', e);
+            }
+        }
+    }
+    
+    // 如果没有有效的编辑器内容，使用currentModelData
+    if (!jsonContent) {
+        if (!currentModelData) {
+            updateStatus('没有可下载的模型');
+            alert('当前没有加载任何模型或JSON编辑器为空，无法下载。');
+            return;
+        }
+        
+        // 使用当前模型数据
+        jsonContent = JSON.stringify(currentModelData, null, 2);
+        sourceDescription = '当前模型';
     }
     
     try {
-        // 转换为JSON字符串
-        const jsonStr = JSON.stringify(currentModelData, null, 2);
-        
         // 创建Blob对象
-        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const blob = new Blob([jsonContent], { type: 'application/json' });
         
         // 创建下载链接
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         
+        // 解析JSON获取模型名称
+        let modelData;
+        try {
+            modelData = JSON.parse(jsonContent);
+        } catch (e) {
+            // 这不应该发生，因为我们之前已经验证过JSON
+            modelData = {};
+        }
+        
         // 生成文件名：检测模型类型
         let fileName;
-        if (currentModelData.final_name) {
+        if (modelData.final_name) {
             // B-rep格式
-            fileName = `${currentModelData.final_name.replace(/\s+/g, '-')}-${Date.now()}.json`;
+            fileName = `${modelData.final_name.replace(/\s+/g, '-')}-${Date.now()}.json`;
         } else {
             // 标准格式
             fileName = `cad-model-${Date.now()}.json`;
@@ -425,7 +456,7 @@ function downloadCurrentModel() {
             URL.revokeObjectURL(url);
         }, 100);
         
-        updateStatus('模型已下载');
+        updateStatus(`${sourceDescription}内容已下载`);
     } catch (error) {
         console.error('下载模型时出错:', error);
         updateStatus('下载模型失败');
@@ -454,6 +485,11 @@ async function loadSampleModel() {
         
         // 更新模型信息
         updateModelInfo(data);
+
+        // 更新JSON编辑器内容
+        if (jsonEditor) {
+            jsonEditor.setJson(data);
+        }
         
         updateStatus('示例模型已加载，点击模型查看控制手柄');
         setTimeout(hideLoading, 500);

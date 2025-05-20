@@ -1,94 +1,804 @@
 {
-    "assembly": {
-        "components": {
-            "1": {
-                "type": "extruded_sketch",
-                "sketch": {
-                    "planes": ["XY"],
-                    "contours": [
-                        {
-                            "type": "rectangle",
-                            "center": [0, 0],
-                            "width": 10,
-                            "height": 6,
-                            "fillet": 0.8
-                        }
-                    ]
-                },
-                "extrusion": {
-                    "distance": 2,
-                    "direction": [0, 0, 1]
-                },
-                "transform": {
-                    "translation": [0, 0, 0],
-                    "rotation": [0, 0, 0]
-                }
-            },
-            "2": {
-                "type": "extruded_sketch",
-                "sketch": {
-                    "planes": ["XY"],
-                    "contours": [
-                        {
-                            "type": "circle",
-                            "center": [0, 0],
-                            "radius": 2.5
-                        }
-                    ]
-                },
-                "extrusion": {
-                    "distance": 4,
-                    "direction": [0, 0, 1]
-                },
-                "transform": {
-                    "translation": [0, 0, 2],
-                    "rotation": [0, 0, 0]
-                }
-            },
-            "3": {
-                "type": "extruded_sketch",
-                "sketch": {
-                    "planes": ["XY"],
-                    "contours": [
-                        {
-                            "type": "rectangle",
-                            "center": [7, 0],
-                            "width": 2,
-                            "height": 8
-                        }
-                    ]
-                },
-                "extrusion": {
-                    "distance": 1,
-                    "direction": [0, 0, 1]
-                },
-                "transform": {
-                    "translation": [0, 0, 1],
-                    "rotation": [0, 0, 0]
-                }
-            },
-            "4": {
-                "type": "extruded_sketch",
-                "sketch": {
-                    "planes": ["XY"],
-                    "contours": [
-                        {
-                            "type": "rectangle",
-                            "center": [-7, 0],
-                            "width": 2,
-                            "height": 8
-                        }
-                    ]
-                },
-                "extrusion": {
-                    "distance": 1,
-                    "direction": [0, 0, 1]
-                },
-                "transform": {
-                    "translation": [0, 0, 1],
-                    "rotation": [0, 0, 0]
-                }
+  "final_name": "RobotBuddy",
+  "final_shape": "A cute small robot with a cylindrical body, rectangular head, articulated arms and legs, and various decorative elements.",
+  "parts": {
+    "part_1": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0,
+          0.12,
+          0.29
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.25
             }
+          }
         }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.4,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Body",
+        "shape": "A cylindrical torso with rounded edges",
+        "length": 0.5,
+        "width": 0.5,
+        "height": 0.4
+      }
+    },
+    "part_2": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0,
+          0.067,
+          0.668
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "line_1": {
+              "Start Point": [
+                -0.2,
+                -0.05
+              ],
+              "End Point": [
+                0.2,
+                -0.05
+              ]
+            },
+            "line_2": {
+              "Start Point": [
+                0.2,
+                -0.05
+              ],
+              "End Point": [
+                0.2,
+                0.15
+              ]
+            },
+            "line_3": {
+              "Start Point": [
+                0.2,
+                0.15
+              ],
+              "End Point": [
+                -0.2,
+                0.15
+              ]
+            },
+            "line_4": {
+              "Start Point": [
+                -0.2,
+                0.15
+              ],
+              "End Point": [
+                -0.2,
+                -0.05
+              ]
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.3,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Head",
+        "shape": "A rectangular head with rounded corners",
+        "length": 0.4,
+        "width": 0.2,
+        "height": 0.3
+      }
+    },
+    "part_3": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          -0.07,
+          0.127,
+          1.079
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.04
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.01,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Left Eye",
+        "shape": "A circular eye with a slight protrusion",
+        "length": 0.08,
+        "width": 0.08,
+        "height": 0.01
+      }
+    },
+    "part_4": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0.07,
+          0.121,
+          1.076
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.04
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.01,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Right Eye",
+        "shape": "A circular eye with a slight protrusion",
+        "length": 0.08,
+        "width": 0.08,
+        "height": 0.01
+      }
+    },
+    "part_5": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          -0.013,
+          -0.008,
+          0.812
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "line_1": {
+              "Start Point": [
+                -0.05,
+                -0.02
+              ],
+              "End Point": [
+                0.05,
+                -0.02
+              ]
+            },
+            "line_2": {
+              "Start Point": [
+                0.05,
+                -0.02
+              ],
+              "End Point": [
+                0.05,
+                0.02
+              ]
+            },
+            "line_3": {
+              "Start Point": [
+                0.05,
+                0.02
+              ],
+              "End Point": [
+                -0.05,
+                0.02
+              ]
+            },
+            "line_4": {
+              "Start Point": [
+                -0.05,
+                0.02
+              ],
+              "End Point": [
+                -0.05,
+                -0.02
+              ]
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.01,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Mouth",
+        "shape": "A small rectangular mouth",
+        "length": 0.1,
+        "width": 0.04,
+        "height": 0.01
+      }
+    },
+    "part_6": {
+      "coordinate_system": {
+        "Euler Angles": [
+          1.57,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0.095,
+          0.125,
+          0
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.05
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.3,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Right Arm",
+        "shape": "A cylindrical arm extending horizontally",
+        "length": 0.05,
+        "width": 0.05,
+        "height": 0.3
+      }
+    },
+    "part_7": {
+      "coordinate_system": {
+        "Euler Angles": [
+          1.57,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          -0.1,
+          0.112,
+          0
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.05
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.3,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Left Arm",
+        "shape": "A cylindrical arm extending horizontally",
+        "length": 0.05,
+        "width": 0.05,
+        "height": 0.3
+      }
+    },
+    "part_8": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0.55,
+          -0.271,
+          0.319
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.08
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.06,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Right Hand",
+        "shape": "A circular hand or gripper",
+        "length": 0.16,
+        "width": 0.16,
+        "height": 0.06
+      }
+    },
+    "part_9": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          -0.55,
+          -0.191,
+          0.563
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.08
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.06,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Left Hand",
+        "shape": "A circular hand or gripper",
+        "length": 0.16,
+        "width": 0.16,
+        "height": 0.06
+      }
+    },
+    "part_10": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0.1,
+          0,
+          0
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "line_1": {
+              "Start Point": [
+                -0.05,
+                0
+              ],
+              "End Point": [
+                0.05,
+                0
+              ]
+            },
+            "line_2": {
+              "Start Point": [
+                0.05,
+                0
+              ],
+              "End Point": [
+                0.05,
+                0.2
+              ]
+            },
+            "line_3": {
+              "Start Point": [
+                0.05,
+                0.2
+              ],
+              "End Point": [
+                -0.05,
+                0.2
+              ]
+            },
+            "line_4": {
+              "Start Point": [
+                -0.05,
+                0.2
+              ],
+              "End Point": [
+                -0.05,
+                0
+              ]
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.1,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Right Leg",
+        "shape": "A rectangular leg supporting the robot",
+        "length": 0.1,
+        "width": 0.2,
+        "height": 0.1
+      }
+    },
+    "part_11": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          -0.1,
+          0,
+          0
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "line_1": {
+              "Start Point": [
+                -0.05,
+                0
+              ],
+              "End Point": [
+                0.05,
+                0
+              ]
+            },
+            "line_2": {
+              "Start Point": [
+                0.05,
+                0
+              ],
+              "End Point": [
+                0.05,
+                0.2
+              ]
+            },
+            "line_3": {
+              "Start Point": [
+                0.05,
+                0.2
+              ],
+              "End Point": [
+                -0.05,
+                0.2
+              ]
+            },
+            "line_4": {
+              "Start Point": [
+                -0.05,
+                0.2
+              ],
+              "End Point": [
+                -0.05,
+                0
+              ]
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.1,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Left Leg",
+        "shape": "A rectangular leg supporting the robot",
+        "length": 0.1,
+        "width": 0.2,
+        "height": 0.1
+      }
+    },
+    "part_12": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0.1,
+          -0.05,
+          0.05
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "line_1": {
+              "Start Point": [
+                -0.07,
+                0
+              ],
+              "End Point": [
+                0.07,
+                0
+              ]
+            },
+            "line_2": {
+              "Start Point": [
+                0.07,
+                0
+              ],
+              "End Point": [
+                0.07,
+                0.03
+              ]
+            },
+            "line_3": {
+              "Start Point": [
+                0.07,
+                0.03
+              ],
+              "End Point": [
+                -0.07,
+                0.03
+              ]
+            },
+            "line_4": {
+              "Start Point": [
+                -0.07,
+                0.03
+              ],
+              "End Point": [
+                -0.07,
+                0
+              ]
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.05,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Right Foot",
+        "shape": "A flat rectangular foot",
+        "length": 0.14,
+        "width": 0.03,
+        "height": 0.05
+      }
+    },
+    "part_13": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          -0.1,
+          -0.05,
+          0.05
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "line_1": {
+              "Start Point": [
+                -0.07,
+                0
+              ],
+              "End Point": [
+                0.07,
+                0
+              ]
+            },
+            "line_2": {
+              "Start Point": [
+                0.07,
+                0
+              ],
+              "End Point": [
+                0.07,
+                0.03
+              ]
+            },
+            "line_3": {
+              "Start Point": [
+                0.07,
+                0.03
+              ],
+              "End Point": [
+                -0.07,
+                0.03
+              ]
+            },
+            "line_4": {
+              "Start Point": [
+                -0.07,
+                0.03
+              ],
+              "End Point": [
+                -0.07,
+                0
+              ]
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.05,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Left Foot",
+        "shape": "A flat rectangular foot",
+        "length": 0.14,
+        "width": 0.03,
+        "height": 0.05
+      }
+    },
+    "part_14": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0,
+          0.35,
+          0.25
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.03
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.005,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Button 1",
+        "shape": "A small circular button on the robot's chest",
+        "length": 0.06,
+        "width": 0.06,
+        "height": 0.005
+      }
+    },
+    "part_15": {
+      "coordinate_system": {
+        "Euler Angles": [
+          0,
+          0,
+          0
+        ],
+        "Translation Vector": [
+          0,
+          0.25,
+          0.25
+        ]
+      },
+      "sketch": {
+        "face_1": {
+          "loop_1": {
+            "circle_1": {
+              "Center": [
+                0,
+                0
+              ],
+              "Radius": 0.03
+            }
+          }
+        }
+      },
+      "extrusion": {
+        "extrude_depth_towards_normal": 0.005,
+        "extrude_depth_opposite_normal": 0,
+        "sketch_scale": 1,
+        "operation": "NewBodyFeatureOperation"
+      },
+      "description": {
+        "name": "Button 2",
+        "shape": "A small circular button on the robot's chest",
+        "length": 0.06,
+        "width": 0.06,
+        "height": 0.005
+      }
     }
+  }
 }
