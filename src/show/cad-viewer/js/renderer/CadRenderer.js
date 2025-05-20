@@ -18,6 +18,7 @@ export class CadRenderer {
         this.eventHandler = new EventHandler(this);
 
         this.objectPartMap = new Map();
+        this.objectInitPosition = new Map();
         
         // 配置属性和限制
         this.gridConfig = {
@@ -130,23 +131,34 @@ export class CadRenderer {
     
     // 通过对象查找partId的辅助方法
     getPartIdFromObject(object) {
-    if (!object) return null;
-    
-    // 直接从对象的userData查找
-    if (object.userData && object.userData.partId) {
-        return object.userData.partId;
-    }
-    
-    // 从映射表中查找
-    if (this.objectPartMap.has(object.uuid)) {
-        return this.objectPartMap.get(object.uuid);
-    }
-    
-    // 递归查找父对象
-    if (object.parent) {
-        return this.getPartIdFromObject(object.parent);
-    }
+        if (!object) return null;
         
+        // 直接从对象的userData查找
+        if (object.userData && object.userData.partId) {
+            return object.userData.partId;
+        }
+        
+        // 从映射表中查找
+        if (this.objectPartMap.has(object.uuid)) {
+            return this.objectPartMap.get(object.uuid);
+        }
+        
+        // 递归查找父对象
+        if (object.parent) {
+            return this.getPartIdFromObject(object.parent);
+        }
+        
+        return null;
+    }
+
+    getInitialPosition(object) {
+        if (object && this.objectInitPosition.has(object.uuid)) {
+            return this.objectInitPosition.get(object.uuid);
+        }
+        // 递归查找父对象
+        if (object.parent) {
+            return this.getInitialPosition(object.parent);
+        }
         return null;
     }
 }

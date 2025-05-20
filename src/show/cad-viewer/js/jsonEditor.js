@@ -179,7 +179,6 @@ export class JsonEditor {
       }
     }
     
-    // 应用JSON更改
     applyChanges() {
       if (!this.validateJson()) return;
       
@@ -196,7 +195,10 @@ export class JsonEditor {
         showLoading('应用JSON更改');
         updateProgress(30);
         
-        // 【新增】销毁旧的controlsManager
+        // 【新增】保存相机状态
+        const cameraState = this.saveCameraState();
+        
+        // 销毁旧的controlsManager
         if (this.renderer && this.renderer.controlsManager) {
           console.log('销毁旧的控制管理器');
           this.renderer.controlsManager.dispose();
@@ -208,10 +210,14 @@ export class JsonEditor {
         if (this.renderer) {
           updateProgress(60);
           
+          // 渲染新模型
+          this.renderer.renderCADFromJson(updatedJson);
+          
           updateProgress(80);
           
-          this.renderer.renderCADFromJson(updatedJson);
-
+          // 【新增】恢复相机状态
+          this.restoreCameraState(cameraState);
+          
           updateProgress(90);
           
           // 更新模型信息
@@ -236,5 +242,80 @@ export class JsonEditor {
         updateStatus('应用JSON更改失败: ' + e.message);
         hideLoading();
       }
+    }
+
+    // 【新增】保存相机状态方法
+    saveCameraState() {
+      if (!this.renderer || !this.renderer.sceneManager) return null;
+      
+      const camera = this.renderer.sceneManager.camera;
+      const controls = this.renderer.sceneManager.controls;
+      
+      if (!camera || !controls) return null;
+      
+      // 保存完整的相机状态
+      return {
+        // 相机位置
+        position: camera.position.clone(),
+        
+        // 控制器目标点 (相机看向的位置)
+        target: controls.target.clone(),
+        
+        // 相机的朝向四元数
+        quaternion: camera.quaternion.clone(),
+        
+        // 视野角度
+        fov: camera.fov,
+        
+        // 近/远剪裁平面
+        near: camera.near,
+        far: camera.far,
+        
+        // 控制器缩放级别
+        zoom: controls.zoom,
+        
+        // 控制器其他属性
+        minDistance: controls.minDistance,
+        maxDistance: controls.maxDistance,
+        
+        // 时间戳，用于调试
+        timestamp: Date.now()
+      };
+    }
+
+    // 【新增】恢复相机状态方法
+    restoreCameraState(state) {
+      if (!state || !this.renderer || !this.renderer.sceneManager) return;
+      
+      const camera = this.renderer.sceneManager.camera;
+      const controls = this.renderer.sceneManager.controls;
+      
+      if (!camera || !controls) return;
+      
+      console.log('恢复相机状态:', state);
+      
+      // 恢复相机位置和朝向
+      camera.position.copy(state.position);
+      camera.quaternion.copy(state.quaternion);
+      
+      // 恢复相机参数
+      camera.fov = state.fov;
+      camera.near = state.near;
+      camera.far = state.far;
+      camera.updateProjectionMatrix();
+      
+      // 恢复控制器状态
+      controls.target.copy(state.target);
+      
+      // 对于OrbitControls
+      if (typeof controls.zoom !== 'undefined') {
+        controls.zoom = state.zoom;
+      }
+      
+      // 更新控制器
+      controls.update();
+      
+      // 强制一次渲染确保视图更新
+      this.renderer.sceneManager.render();
     }
 }

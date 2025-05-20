@@ -345,6 +345,8 @@ export class ControlsManager {
         // 计算对象的新位置 - 使用原始位置加上局部移动向量
         const objectNewPosition = this.dragStartObjPosition.clone().add(localMoveVector);
 
+        this.updatePartTranslation(object);
+        
         // 更新对象位置
         object.position.copy(objectNewPosition);
 
@@ -354,8 +356,6 @@ export class ControlsManager {
             this.gizmoLast.set(object.uuid, gizmoNewPosition.clone());
         }
         
-        this.updatePartTranslation(object);
-
         // 计算实际移动距离
         const distance = localMoveVector.length();
         
@@ -524,11 +524,14 @@ export class ControlsManager {
                         
                         // 更新特定轴的值
                         const axisIndex = {x: 0, y: 2, z: 1}[this.dragAxis];
-                        const roundedValue = Math.round(object.position[this.dragAxis] * 1000) / 1000;
+                        const InitPosition = this.renderer.getInitialPosition(object);
+                        const roundedValue = Math.round((object.position[this.dragAxis] + InitPosition[axisIndex]) * 1000) / 1000;
                         
+                        console.log('roundedValue is', roundedValue);
+
                         // 只在值有变化时更新
-                        if (part.coordinate_system["Translation Vector"][axisIndex] !== roundedValue) {
-                            part.coordinate_system["Translation Vector"][axisIndex] = roundedValue;
+                        if (Math.abs(roundedValue - part.coordinate_system["Translation Vector"][axisIndex]) >= 1e-6) {
+                                part.coordinate_system["Translation Vector"][axisIndex] = roundedValue;
                             
                             // 更新编辑器内容
                             this.updateJsonEditor(jsonData);
