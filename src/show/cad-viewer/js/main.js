@@ -50,50 +50,6 @@ async function initApp() {
     document.getElementById('axesToggle').addEventListener('change', (e) => renderer.toggleAxes(e.target.checked));
     document.getElementById('shadowToggle').addEventListener('change', (e) => renderer.toggleShadows(e.target.checked));
     
-    // 添加事件监听器 - 边界框和网格设置 (检查元素是否存在再添加)
-    const boundingBoxToggle = document.getElementById('boundingBoxToggle');
-    if (boundingBoxToggle) {
-        boundingBoxToggle.addEventListener('change', (e) => renderer.toggleBoundingBox(e.target.checked));
-    }
-    
-    const gridSizeInput = document.getElementById('gridSizeInput');
-    if (gridSizeInput) {
-        gridSizeInput.addEventListener('change', (e) => {
-            const size = parseInt(e.target.value);
-            if (size >= 0 && size <= 10000) {
-                renderer.setGridConfig({ size: size });
-            }
-        });
-    }
-    
-    const verticalMinInput = document.getElementById('verticalMinInput');
-    if (verticalMinInput) {
-        verticalMinInput.addEventListener('change', (e) => {
-            const min = parseFloat(e.target.value);
-            const maxInput = document.getElementById('verticalMaxInput');
-            if (maxInput) {
-                const max = parseFloat(maxInput.value);
-                if (min >= -10000 && min < max) {
-                    renderer.setDragLimits({ vertical: { min: min } });
-                }
-            }
-        });
-    }
-    
-    const verticalMaxInput = document.getElementById('verticalMaxInput');
-    if (verticalMaxInput) {
-        verticalMaxInput.addEventListener('change', (e) => {
-            const max = parseFloat(e.target.value);
-            const minInput = document.getElementById('verticalMinInput');
-            if (minInput) {
-                const min = parseFloat(minInput.value);
-                if (max > min && max <= 50) {
-                    renderer.setDragLimits({ vertical: { max: max } });
-                }
-            }
-        });
-    }
-    
     // 添加事件监听器 - 主题切换
     document.getElementById('themeToggle').addEventListener('click', () => {
         console.log('主题切换按钮被点击');
@@ -112,11 +68,106 @@ async function initApp() {
     
     // 初始化渲染器
     await renderer.init();
+
+    // 添加事件监听器 - 边界框和网格设置 (检查元素是否存在再添加)
+    const boundingBoxToggle = document.getElementById('boundingBoxToggle');
+    if (boundingBoxToggle) {
+        boundingBoxToggle.addEventListener('change', (e) => renderer.toggleBoundingBox(e.target.checked));
+        // 切换边界框时更新网格位置以保持一致
+        syncGridWithBoundaries();
+    }
+    
+    const gridSizeInput = document.getElementById('gridSizeInput');
+    if (gridSizeInput) {
+        gridSizeInput.addEventListener('change', (e) => {
+            const size = parseInt(e.target.value);
+            if (size > 0) {
+                renderer.setGridConfig({ size: size });
+                syncBoundariesWithGrid(size);
+            }
+        });
+    }
+    
+    const verticalMinInput = document.getElementById('verticalMinInput');
+    if (verticalMinInput) {
+        verticalMinInput.addEventListener('change', (e) => {
+            const min = parseFloat(e.target.value);
+            const maxInput = document.getElementById('verticalMaxInput');
+            if (maxInput) {
+                const max = parseFloat(maxInput.value);
+                if (min != NaN && min < max) {
+                    renderer.setDragLimits({ vertical: { min: min } });
+                    // 更新网格高度位置
+                    syncGridWithBoundaries();
+                    // 如果边界框可见，重新绘制以反映新界限
+                    if (boundingBoxToggle && boundingBoxToggle.checked) {
+                        renderer.toggleBoundingBox(false);
+                        setTimeout(() => renderer.toggleBoundingBox(true), 50);
+                    }
+                }
+            }
+        });
+    }
+    
+    const verticalMaxInput = document.getElementById('verticalMaxInput');
+    if (verticalMaxInput) {
+        verticalMaxInput.addEventListener('change', (e) => {
+            const max = parseFloat(e.target.value);
+            const minInput = document.getElementById('verticalMinInput');
+            if (minInput) {
+                const min = parseFloat(minInput.value);
+                if (max > min && max != NaN) {
+                    renderer.setDragLimits({ vertical: { max: max } });
+                    // 更新网格高度位置
+                    syncGridWithBoundaries();
+                    // 如果边界框可见，重新绘制以反映新界限
+                    if (boundingBoxToggle && boundingBoxToggle.checked) {
+                        renderer.toggleBoundingBox(false);
+                        setTimeout(() => renderer.toggleBoundingBox(true), 50);
+                    }
+                }
+            }
+        });
+    }
     
     // 自动加载示例模型
     setTimeout(loadSampleModel, 500);
     
     updateStatus('初始化完成');
+}
+
+// 辅助函数 - 将网格与边界同步
+function syncGridWithBoundaries() {
+    // 获取当前垂直限制
+    const min = parseFloat(verticalMinInput?.value || 0);
+    const gridSize = parseInt(gridSizeInput?.value || 100);
+    
+    // 更新网格位置到底部边界
+    if (!isNaN(min) && !isNaN(gridSize)) {
+        renderer.setGridConfig({
+            position: { y: min }  // 将网格放在垂直最小值处
+        });
+    }
+}
+
+// 辅助函数 - 更新边界以匹配网格大小
+function syncBoundariesWithGrid(gridSize) {
+    if (!isNaN(gridSize)) {
+        // 设置水平边界以匹配网格
+        const halfSize = gridSize / 2;
+        renderer.setDragLimits({ 
+            horizontal: { 
+                min: -halfSize, 
+                max: halfSize 
+            } 
+        });
+    
+        // 如果边界框可见，重新绘制
+        if (boundingBoxToggle && boundingBoxToggle.checked) {
+            renderer.toggleBoundingBox(false);
+            setTimeout(() => renderer.toggleBoundingBox(true), 50);
+        }
+    }
 }
 
 // 处理对象被移动事件
