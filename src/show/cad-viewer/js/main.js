@@ -134,6 +134,10 @@ async function initApp() {
     // 初始化文件管理器
     fileExplorer.init();
     window.fileExplorer = fileExplorer;
+
+    // 导出到全局供其他模块访问
+    sidebarRating.init();
+    window.sidebarRating = sidebarRating;
     
     // 自动加载示例模型
     setTimeout(loadSampleModel, 500);
@@ -1505,5 +1509,452 @@ function initResizableSidebar() {
         }
     });
 }
+
+// sidebarRating.js - 侧边栏评分系统 (修复文件收集功能)
+
+const sidebarRating = {
+    folderHandle: null,
+    jsonFiles: [],
+    currentFileIndex: 0,
+    ratings: [],
+    timer: null,
+    timerSeconds: 30,
+    timeLeft: 30,
+    autoTimerEnabled: true,
+    currentRating: 0,
+    sidebarOpen: false,
+    
+    // 初始化
+    init: function() {
+        // 绑定按钮和控件事件
+        this.bindEvents();
+        
+        console.log('侧边栏评分系统初始化完成');
+    },
+    
+    // 绑定所有事件
+    bindEvents: function() {
+        // 启动按钮
+        document.getElementById('startRatingBtn')?.addEventListener('click', () => this.startRating());
+        
+        // 侧边栏控制
+        document.getElementById('closeSidebarBtn')?.addEventListener('click', () => this.closeSidebar());
+        document.getElementById('sidebarToggle')?.addEventListener('click', () => this.toggleSidebar());
+        
+        // 评分操作
+        document.getElementById('skipModelBtn')?.addEventListener('click', () => this.skipCurrentFile());
+        document.getElementById('submitRatingBtn')?.addEventListener('click', () => this.submitRating());
+        
+        // 星级评分 - 更新类名
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', (e) => {
+                const value = parseInt(e.currentTarget.dataset.value);
+                this.setRating(value);
+            });
+        });
+        
+        // 计时器控制
+        document.getElementById('autoTimerEnabled')?.addEventListener('change', (e) => {
+            this.autoTimerEnabled = e.target.checked;
+            this.updateTimerUI();
+            if (this.autoTimerEnabled && this.jsonFiles.length > 0) {
+                this.startTimer();
+            } else {
+                this.stopTimer();
+            }
+        });
+        
+        // 计时器滑块
+        document.getElementById('timerSlider')?.addEventListener('input', (e) => {
+            this.timerSeconds = parseInt(e.target.value);
+            document.getElementById('timerValue').textContent = this.timerSeconds;
+            
+            // 如果正在计时，重置计时器
+            if (this.timer) {
+                this.stopTimer();
+                this.startTimer();
+            }
+        });
+        
+        // 结果对话框
+        document.getElementById('downloadCsvBtn')?.addEventListener('click', () => this.downloadCsv());
+        document.getElementById('closeDialogBtn')?.addEventListener('click', () => this.closeResultDialog());
+    },
+    
+    // 开始评分流程
+    async startRating() {
+        try {
+            // 检查浏览器支持
+            if (!('showDirectoryPicker' in window)) {
+                alert('您的浏览器不支持文件系统访问API，请使用Chrome或Edge浏览器。');
+                return;
+            }
+            
+            // 显示文件夹选择对话框
+            this.folderHandle = await window.showDirectoryPicker();
+            
+            // 重置状态
+            this.jsonFiles = [];
+            this.currentFileIndex = 0;
+            this.ratings = [];
+            
+            // 显示侧边栏
+            this.openSidebar();
+            
+            // 显示侧边栏切换按钮
+            document.getElementById('sidebarToggle').style.display = 'flex';
+            
+            // 收集所有JSON文件
+            document.getElementById('ratingCurrentPath').textContent = '正在扫描文件夹...';
+            
+            try {
+                // 开始递归收集文件
+                await this.collectJsonFiles(this.folderHandle);
+                
+                if (this.jsonFiles.length === 0) {
+                    document.getElementById('ratingCurrentPath').textContent = '找不到JSON文件';
+                    alert('选择的文件夹中没有JSON文件。');
+                    return;
+                }
+                
+                // 更新状态
+                document.getElementById('ratingTotalFiles').textContent = this.jsonFiles.length;
+                updateStatus(`开始对${this.jsonFiles.length}个模型进行打分`);
+                
+                // 开始第一个文件
+                this.loadFile(0);
+            } catch (err) {
+                console.error('扫描文件夹失败:', err);
+                document.getElementById('ratingCurrentPath').textContent = '扫描文件夹失败';
+                alert('扫描文件夹失败: ' + err.message);
+            }
+            
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('打分过程启动失败:', error);
+                document.getElementById('ratingCurrentPath').textContent = '启动失败';
+                updateStatus('打分过程启动失败');
+            }
+        }
+    },
+    
+    // 递归收集文件夹中的所有JSON文件 - 修复实现
+    async collectJsonFiles(folderHandle, path = '') {
+        try {
+            // 使用 entries() 方法获取目录内容的迭代器
+            const entries = await folderHandle.entries();
+            
+            // 遍历目录中的所有项目
+            for await (const [name, entry] of entries) {
+                // 构建当前条目的路径
+                const entryPath = path ? `${path}/${name}` : name;
+                
+                // 如果是目录，则递归处理
+                if (entry.kind === 'directory') {
+                    await this.collectJsonFiles(entry, entryPath);
+                } 
+                // 如果是JSON文件，则添加到文件列表
+                else if (entry.kind === 'file' && name.toLowerCase().endsWith('.json')) {
+                    this.jsonFiles.push({
+                        handle: entry,
+                        path: entryPath,
+                        name: name
+                    });
+                    
+                    // 更新当前路径显示，让用户知道扫描正在进行
+                    if (this.jsonFiles.length % 5 === 0) { // 每5个文件更新一次，减少DOM操作
+                        document.getElementById('ratingCurrentPath').textContent = 
+                            `正在扫描: 已找到 ${this.jsonFiles.length} 个JSON文件...`;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('扫描目录失败:', error, path);
+            throw new Error(`无法访问目录 "${path}": ${error.message}`);
+        }
+    },
+    
+    // 加载指定索引的文件
+    async loadFile(index) {
+        if (index >= this.jsonFiles.length) {
+            // 所有文件已完成
+            this.finishRating();
+            return;
+        }
+        
+        const fileInfo = this.jsonFiles[index];
+        this.currentFileIndex = index;
+        
+        try {
+            // 更新UI
+            document.getElementById('ratingCurrentPath').textContent = fileInfo.path;
+            document.getElementById('ratingCurrentIndex').textContent = index + 1;
+            
+            // 更新进度条
+            const progressPercent = ((index + 1) / this.jsonFiles.length) * 100;
+            document.getElementById('ratingProgressBar').style.width = `${progressPercent}%`;
+            
+            // 重置评分状态
+            this.resetRatingState();
+            
+            // 加载文件内容
+            const file = await fileInfo.handle.getFile();
+            const content = await file.text();
+            
+            try {
+                // 解析JSON并渲染
+                const jsonData = JSON.parse(content);
+                
+                // 渲染模型
+                if (window.jsonEditor) {
+                    window.jsonEditor.setJson(jsonData);
+                }
+                
+                if (window.renderer) {
+                    window.renderer.renderCADFromJson(jsonData);
+                }
+                
+                // 启动计时器
+                if (this.autoTimerEnabled) {
+                    this.startTimer();
+                }
+                
+                updateStatus(`正在评分: ${fileInfo.path}`);
+            } catch (jsonError) {
+                console.error('JSON解析失败:', jsonError);
+                // 跳过有问题的文件
+                this.skipToNext('JSON解析失败');
+            }
+        } catch (error) {
+            console.error('加载文件失败:', error);
+            // 跳过有问题的文件
+            this.skipToNext('文件加载失败');
+        }
+    },
+    
+    // 启动计时器
+    startTimer() {
+        // 清除现有计时器
+        this.stopTimer();
+        
+        // 重置时间
+        this.timeLeft = this.timerSeconds;
+        document.getElementById('timerCountdown').textContent = this.timeLeft;
+        document.getElementById('timerProgressBar').style.width = '100%';
+        
+        // 启动新计时器
+        this.timer = setInterval(() => {
+            this.timeLeft--;
+            document.getElementById('timerCountdown').textContent = this.timeLeft;
+            
+            // 更新进度条
+            const progressPercent = (this.timeLeft / this.timerSeconds) * 100;
+            document.getElementById('timerProgressBar').style.width = `${progressPercent}%`;
+            
+            if (this.timeLeft <= 0) {
+                this.stopTimer();
+                this.skipToNext('时间到');
+            }
+        }, 1000);
+    },
+    
+    // 停止计时器
+    stopTimer() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+    },
+    
+    // 更新计时器UI状态
+    updateTimerUI() {
+        const timerContainer = document.getElementById('timerProgressContainer');
+        const timerControl = document.querySelector('.rating-timer-control');
+        
+        if (this.autoTimerEnabled) {
+            timerContainer.style.display = 'block';
+            timerControl.style.opacity = '1';
+        } else {
+            timerContainer.style.display = 'none';
+            timerControl.style.opacity = '0.5';
+        }
+    },
+    
+    // 设置评分
+    setRating(value) {
+        this.currentRating = value;
+        
+        // 更新UI
+        document.querySelectorAll('.rating-star').forEach(star => {
+            const starValue = parseInt(star.dataset.value);
+            if (starValue <= value) {
+                star.classList.add('rating-active');
+            } else {
+                star.classList.remove('rating-active');
+            }
+        });
+        
+        // 更新评分文本
+        const ratingTexts = ['极差', '较差', '一般', '良好', '优秀'];
+        document.getElementById('ratingValue').textContent = `${value}分 - ${ratingTexts[value-1]}`;
+    },
+    
+    // 重置评分状态
+    resetRatingState() {
+        this.currentRating = 0;
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.classList.remove('rating-active');
+        });
+        document.getElementById('ratingValue').textContent = '未评分';
+        document.getElementById('ratingComment').value = '';
+    },
+    
+    // 提交当前评分
+    submitRating() {
+        if (this.currentRating === 0) {
+            alert('请为模型打分后再提交！');
+            return;
+        }
+        
+        // 记录评分
+        const fileInfo = this.jsonFiles[this.currentFileIndex];
+        this.ratings.push({
+            path: fileInfo.path,
+            filename: fileInfo.name || fileInfo.handle.name,
+            rating: this.currentRating,
+            comment: document.getElementById('ratingComment').value,
+            timestamp: new Date().toISOString()
+        });
+        
+        // 停止计时器
+        this.stopTimer();
+        
+        // 进入下一个文件
+        this.loadFile(this.currentFileIndex + 1);
+    },
+    
+    // 跳过当前文件
+    skipCurrentFile() {
+        this.skipToNext('用户跳过');
+    },
+    
+    // 跳转到下一个文件并记录原因
+    skipToNext(reason) {
+        // 记录跳过
+        const fileInfo = this.jsonFiles[this.currentFileIndex];
+        this.ratings.push({
+            path: fileInfo.path,
+            filename: fileInfo.name || fileInfo.handle.name,
+            rating: 0,
+            comment: `[${reason}]`,
+            timestamp: new Date().toISOString()
+        });
+        
+        // 停止计时器
+        this.stopTimer();
+        
+        // 进入下一个文件
+        this.loadFile(this.currentFileIndex + 1);
+    },
+    
+    // 完成所有评分
+    finishRating() {
+        // 关闭侧边栏
+        this.closeSidebar();
+        
+        // 隐藏侧边栏切换按钮
+        document.getElementById('sidebarToggle').style.display = 'none';
+        
+        // 显示结果对话框
+        const dialog = document.getElementById('ratingCompleteDialog');
+        document.getElementById('completedFilesCount').textContent = this.jsonFiles.length;
+        dialog.style.display = 'flex';
+        setTimeout(() => {
+            dialog.classList.add('rating-visible');
+        }, 10);
+        
+        updateStatus('所有模型评分完成，可以下载CSV文件。');
+    },
+    
+    // 关闭结果对话框
+    closeResultDialog() {
+        const dialog = document.getElementById('ratingCompleteDialog');
+        dialog.classList.remove('rating-visible');
+        setTimeout(() => {
+            dialog.style.display = 'none';
+        }, 300);
+    },
+    
+    // 生成并下载CSV
+    downloadCsv() {
+        // 准备CSV内容
+        let csvContent = 'Path,Filename,Rating,Comment,Timestamp\n';
+        
+        // 添加每一行数据
+        this.ratings.forEach(rating => {
+            // 转义字段中的逗号和引号
+            const escapedPath = `"${rating.path.replace(/"/g, '""')}"`;
+            const escapedFilename = `"${rating.filename.replace(/"/g, '""')}"`;
+            const escapedComment = `"${rating.comment.replace(/"/g, '""')}"`;
+            
+            csvContent += `${escapedPath},${escapedFilename},${rating.rating},${escapedComment},${rating.timestamp}\n`;
+        });
+        
+        // 创建Blob对象
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        
+        // 创建下载链接
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        // 设置下载属性
+        link.setAttribute('href', url);
+        link.setAttribute('download', `model_ratings_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`);
+        link.style.visibility = 'hidden';
+        
+        // 添加到文档并触发点击
+        document.body.appendChild(link);
+        link.click();
+        
+        // 清理
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        // 关闭结果对话框
+        this.closeResultDialog();
+        
+        updateStatus('评分结果已导出为CSV文件。');
+    },
+    
+    // 打开侧边栏
+    openSidebar() {
+        const sidebar = document.getElementById('ratingSidebar');
+        sidebar.classList.add('rating-open');
+        this.sidebarOpen = true;
+        
+        const toggle = document.getElementById('sidebarToggle');
+        toggle.classList.add('rating-active');
+    },
+    
+    // 关闭侧边栏
+    closeSidebar() {
+        const sidebar = document.getElementById('ratingSidebar');
+        sidebar.classList.remove('rating-open');
+        this.sidebarOpen = false;
+        
+        const toggle = document.getElementById('sidebarToggle');
+        toggle.classList.remove('rating-active');
+    },
+    
+    // 切换侧边栏状态
+    toggleSidebar() {
+        if (this.sidebarOpen) {
+            this.closeSidebar();
+        } else {
+            this.openSidebar();
+        }
+    }
+};
+
 // 初始化应用
 window.addEventListener('load', initApp);

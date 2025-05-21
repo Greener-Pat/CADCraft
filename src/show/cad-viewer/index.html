@@ -15,6 +15,7 @@
     <!-- 导入模型生成样式 -->
     <link rel="stylesheet" href="css/model-generator.css">
     <link rel="stylesheet" href="css/fileExplorer.css">
+    <link rel="stylesheet" href="css/rating.css">
     <script type="importmap">
         {
           "imports": {
@@ -82,6 +83,123 @@
 
     <!-- 主要内容区域 - 使用Flexbox确保正确排列 -->
     <div class="app-container">
+
+        <!-- 侧边栏评分系统 - 添加前缀并左侧弹出 -->
+        <div class="rating-sidebar" id="ratingSidebar">
+        <div class="rating-sidebar-header">
+            <h3>模型评分</h3>
+            <button class="rating-sidebar-close" id="closeSidebarBtn">
+            <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="rating-sidebar-content">
+            <!-- 文件信息与进度 -->
+            <div class="rating-file-info">
+            <div class="rating-file-progress">
+                <div class="rating-progress-bar-container">
+                <div class="rating-progress-bar" id="ratingProgressBar"></div>
+                </div>
+                <div class="rating-progress-text">
+                <span id="ratingCurrentIndex">0</span>/<span id="ratingTotalFiles">0</span>
+                </div>
+            </div>
+            <div class="rating-file-path" id="ratingCurrentPath">未选择文件</div>
+            </div>
+            
+            <!-- 评分区域 -->
+            <div class="rating-area">
+            <div class="rating-stars-container">
+                <p>您的评分</p>
+                <div class="rating-stars">
+                <span class="rating-star" data-value="1"><i class="fas fa-star"></i></span>
+                <span class="rating-star" data-value="2"><i class="fas fa-star"></i></span>
+                <span class="rating-star" data-value="3"><i class="fas fa-star"></i></span>
+                <span class="rating-star" data-value="4"><i class="fas fa-star"></i></span>
+                <span class="rating-star" data-value="5"><i class="fas fa-star"></i></span>
+                </div>
+                <div class="rating-label-points">
+                <span class="rating-point">差</span>
+                <span class="rating-point">较差</span>
+                <span class="rating-point">一般</span>
+                <span class="rating-point">良好</span>
+                <span class="rating-point">优秀</span>
+                </div>
+                <div class="rating-value" id="ratingValue">未评分</div>
+            </div>
+            
+            <div class="rating-comment">
+                <label for="ratingComment">评论(可选)</label>
+                <textarea id="ratingComment" placeholder="请输入您对此模型的评价..."></textarea>
+            </div>
+            </div>
+            
+            <!-- 自动计时设置 -->
+            <div class="rating-timer-settings">
+            <label class="rating-timer-label">
+                <input type="checkbox" id="autoTimerEnabled" checked>
+                <span class="rating-slider"></span>
+                <span class="rating-label-text">自动计时</span>
+            </label>
+            
+            <div class="rating-timer-control">
+                <input type="range" id="timerSlider" min="5" max="60" value="30" step="5">
+                <div class="rating-timer-value">
+                <span id="timerValue">30</span>秒
+                </div>
+            </div>
+            
+            <div class="rating-timer-progress" id="timerProgressContainer">
+                <div class="rating-timer-indicator">
+                <div class="rating-timer-progress-bar" id="timerProgressBar"></div>
+                <span id="timerCountdown">30</span>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+        <div class="rating-sidebar-footer">
+            <button class="rating-button rating-secondary" id="skipModelBtn">
+            <i class="fas fa-forward"></i>
+            <span>跳过</span>
+            </button>
+            <button class="rating-button rating-primary" id="submitRatingBtn">
+            <i class="fas fa-check"></i>
+            <span>提交评分</span>
+            </button>
+        </div>
+        </div>
+
+        <!-- 评分启动按钮 -->
+        <button id="startRatingBtn" class="rating-start-button">
+        <i class="fas fa-star"></i>
+        <span>开始批量评分</span>
+        </button>
+
+        <!-- 评分完成对话框 -->
+        <div id="ratingCompleteDialog" class="rating-dialog">
+        <div class="rating-dialog-content">
+            <div class="rating-dialog-icon">
+            <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>评分完成</h3>
+            <p>已完成全部<span id="completedFilesCount">0</span>个模型的评分</p>
+            <div class="rating-dialog-actions">
+            <button id="downloadCsvBtn" class="rating-button rating-primary">
+                <i class="fas fa-file-csv"></i>
+                <span>导出CSV</span>
+            </button>
+            <button id="closeDialogBtn" class="rating-button rating-secondary">关闭</button>
+            </div>
+        </div>
+        </div>
+
+        <!-- 侧边栏触发器(用于折叠/展开) -->
+        <div class="rating-sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-star"></i>
+        </div>
+
+
         <!-- 渲染区域 - 左侧 -->
         <main class="viewer-container">
             <div id="container"></div>
@@ -383,27 +501,6 @@
                 </div>
             </div>
 
-            <!-- 使用指南区块 -->
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <h3>使用指南</h3>
-                    <button class="toggle-btn" title="折叠/展开">
-                        <i class="fa-solid fa-chevron-up"></i>
-                    </button>
-                </div>
-                <div class="section-content">
-                    <ul class="guide-list">
-                        <li><i class="fa-solid fa-computer-mouse"></i> 鼠标左键旋转</li>
-                        <li><i class="fa-solid fa-hand"></i> 鼠标右键平移</li>
-                        <li><i class="fa-solid fa-up-down"></i> 鼠标滚轮缩放</li>
-                        <li><i class="fa-solid fa-arrow-pointer"></i> 点击选择对象</li>
-                        <li><i class="fa-solid fa-arrows-left-right-to-line"></i> 拖拽红色箭头沿X轴移动</li>
-                        <li><i class="fa-solid fa-arrows-up-down"></i> 拖拽绿色箭头沿Y轴移动</li>
-                        <li><i class="fa-solid fa-arrows-left-right"></i> 拖拽蓝色箭头沿Z轴移动</li>
-                    </ul>
-                </div>
-            </div>
-
             <div class="sidebar-section" id="jsonEditorSection">
                 <div class="section-header">
                     <h3><i class="fa-solid fa-code"></i> JSON 编辑器</h3>
@@ -427,6 +524,27 @@
                             应用更改
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- 使用指南区块 -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <h3>使用指南</h3>
+                    <button class="toggle-btn" title="折叠/展开">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="section-content">
+                    <ul class="guide-list">
+                        <li><i class="fa-solid fa-computer-mouse"></i> 鼠标左键旋转</li>
+                        <li><i class="fa-solid fa-hand"></i> 鼠标右键平移</li>
+                        <li><i class="fa-solid fa-up-down"></i> 鼠标滚轮缩放</li>
+                        <li><i class="fa-solid fa-arrow-pointer"></i> 点击选择对象</li>
+                        <li><i class="fa-solid fa-arrows-left-right-to-line"></i> 拖拽红色箭头沿X轴移动</li>
+                        <li><i class="fa-solid fa-arrows-up-down"></i> 拖拽绿色箭头沿Y轴移动</li>
+                        <li><i class="fa-solid fa-arrows-left-right"></i> 拖拽蓝色箭头沿Z轴移动</li>
+                    </ul>
                 </div>
             </div>
 
