@@ -5,20 +5,18 @@ from PIL import Image
 from config import IMAGE_DIR, DEVICE, BATCH_SIZE
 from transformers import CLIPProcessor, CLIPModel
 
-def generate_embeddings(model, processor, keyword=None, captions_dict=None, use_captions=False, uploaded_image_path=None):
+def precompute_embeddings(model, processor, output_file="embeddings.pt", captions_dict=None, use_captions=False):
     """
-    Generate image embeddings for database images (optionally with captions or uploaded image comparison).
+    Precompute and save embeddings for all images in IMAGE_DIR.
     Args:
         model: CLIPModel
         processor: CLIPProcessor
-        keyword: Search keyword (optional)
+        output_file: Path to save the embeddings (torch .pt file)
         captions_dict: Dictionary mapping image paths to captions
         use_captions: Whether to use captions for text embeddings
-        uploaded_image_path: Path to uploaded image for similarity comparison (optional)
     Returns:
         image_paths: List of image paths
         embeddings: Image embeddings (torch.Tensor)
-        similarities: Keyword or uploaded image similarities (numpy.ndarray)
     """
     image_paths = [
         os.path.join(IMAGE_DIR, f) for f in os.listdir(IMAGE_DIR)
@@ -51,6 +49,53 @@ def generate_embeddings(model, processor, keyword=None, captions_dict=None, use_
             embeddings.append(image_features)
     
     embeddings = torch.cat(embeddings, dim=0)
+    
+    # Save embeddings and image paths
+    torch.save({
+        'image_paths': image_paths,
+        'embeddings': embeddings
+    }, output_file)
+    print(f"Saved embeddings to {output_file}")
+    
+    return image_paths, embeddings
+
+def load_precomputed_embeddings(input_file="embeddings.pt"):
+    """
+    Load precomputed embeddings from file.
+    Args:
+        input_file: Path to the saved embeddings file
+    Returns:
+        image_paths: List of image paths
+        embeddings: Image embeddings (torch.Tensor)
+    """
+    if not os.path.exists(input_file):
+        raise FileNotFoundError(f"Embeddings file {input_file} not found")
+    
+    data = torch.load(input_file)
+    return data['image_paths'], data['embeddings']
+
+def generate_embeddings(model, processor, keyword=None, captions_dict=None, use_captions=False, uploaded_image_path=None, embeddings_file="embeddings.pt"):
+    """
+    Generate or load image embeddings for database images.
+    Args:
+        model: CLIPModel
+        processor: CLIPProcessor
+        keyword: Search keyword (optional)
+        captions_dict: Dictionary mapping image paths to captions
+        use_captions: Whether to use captions for text embeddings
+        uploaded_image_path: Path to uploaded image for similarity comparison (optional)
+        embeddings_file: Path to precomputed embeddings file
+    Returns:
+        image_paths: List of image paths
+        embeddings: Image embeddings (torch.Tensor)
+        similarities: Keyword or uploaded image similarities (numpy.ndarray)
+    """
+    # Try to load precomputed embeddings
+    if os.path.exists(embeddings_file):
+        image_paths, embeddings = load_precomputed_embeddings(embeddings_file)
+    else:
+        # Compute and save embeddings
+        image_paths, embeddings = precompute_embeddings(model, processor, embeddings_file, captions_dict, use_captions)
     
     if uploaded_image_path:
         uploaded_embedding = generate_single_image_embedding(model, processor, uploaded_image_path)
