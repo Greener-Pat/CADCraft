@@ -95,8 +95,18 @@ export class SceneManager {
     createGrid() {
         if (this.gridHelper) this.scene.remove(this.gridHelper);
         
-        const { size, divisions, mainColor, secondaryColor } = this.renderer.gridConfig;
+        const { size, divisions, mainColor, secondaryColor, position } = this.renderer.gridConfig;
         this.gridHelper = new THREE.GridHelper(size, divisions, mainColor, secondaryColor);
+
+        // 设置网格位置 - 这是关键修复
+        if (position) {
+            this.gridHelper.position.set(
+                position.x || 0,
+                position.y || 0,
+                position.z || 0
+            );
+        }
+
         this.scene.add(this.gridHelper);
     }
     
@@ -116,7 +126,7 @@ export class SceneManager {
         const depth = width; // 使用相同的宽度
         
         const boxGeometry = new THREE.BoxGeometry(width, height, depth);
-        boxGeometry.translate(0, height/2, 0);
+        boxGeometry.translate(0, height/2 + vertical.min, 0);
         
         const edges = new THREE.EdgesGeometry(boxGeometry);
         const material = new THREE.LineBasicMaterial({ 

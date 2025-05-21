@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <!-- 导入模型生成样式 -->
     <link rel="stylesheet" href="css/model-generator.css">
+    <link rel="stylesheet" href="css/fileExplorer.css">
     <script type="importmap">
         {
           "imports": {
@@ -345,6 +346,43 @@
                 </div>
             </div>
 
+             <!-- VS Code 风格的文件资源管理器 - 美化版 -->
+            <div class="sidebar-section explorer-section">
+                <div class="explorer-header">
+                    <span class="explorer-title">资源管理器</span>
+                    <div class="explorer-actions">
+                        <button id="openFolderBtn" class="explorer-action" title="打开文件夹">
+                            <i class="codicon codicon-folder-opened"></i>
+                        </button>
+                        <button id="refreshBtn" class="explorer-action" title="刷新">
+                            <i class="codicon codicon-refresh"></i>
+                        </button>
+                        <button id="collapseAllBtn" class="explorer-action" title="全部折叠">
+                            <i class="codicon codicon-collapse-all"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="explorer-container">
+                    <div id="fileTree" class="file-tree">
+                        <!-- 文件树内容将由JavaScript动态生成 -->
+                        <div class="explorer-empty">
+                            <i class="codicon codicon-folder-opened empty-icon"></i>
+                            <div class="empty-text">
+                                <p>尚未打开文件夹</p>
+                                <p style="font-size: 12px; margin-top: 8px; opacity: 0.8;">
+                                    打开文件夹以浏览和编辑JSON文件
+                                </p>
+                            </div>
+                            <button id="selectFolderBtn" class="select-folder-btn">
+                                <i class="codicon codicon-folder-opened"></i>
+                                <span>打开文件夹</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 使用指南区块 -->
             <div class="sidebar-section">
                 <div class="section-header">
@@ -391,6 +429,7 @@
                     </div>
                 </div>
             </div>
+
         </aside>
     </div>
 

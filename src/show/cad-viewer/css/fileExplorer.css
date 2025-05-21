@@ -1,0 +1,466 @@
+/* VS Code 风格资源管理器 - 美化版 */
+@import url('https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.css');
+
+:root {
+    /* VS Code Light Theme Colors */
+    --vscode-foreground: #282a36;
+    --vscode-sidebar-background: #fafafa;
+    --vscode-list-hover-background: rgba(0, 0, 0, 0.04);
+    --vscode-list-active-selection-background: #0060c0;
+    --vscode-list-active-selection-foreground: #ffffff;
+    --vscode-list-inactive-selection-background: #e4e6f1;
+    --vscode-focus-border: #007acc;
+    --vscode-button-background: #007acc;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hover-background: #0062a3;
+    --vscode-editor-background: #ffffff;
+    --vscode-input-background: #ffffff;
+    --vscode-input-border: #cecece;
+    --vscode-panel-border: #e7e7e7;
+    
+    /* 添加标题栏专用颜色 */
+    --vscode-header-background: #f0f0f0;
+    --vscode-header-border: #e0e0e0;
+
+    /* File icons colors */
+    --icon-folder: #dcb67a;
+    --icon-folder-expanded: #dcb67a;
+    --icon-json: #f5c43c;
+    --icon-hover-opacity: 0.9;
+    --icon-arrow: #424242;
+}
+
+body.dark-theme {
+    /* VS Code Dark Theme Colors */
+    --vscode-foreground: #fafafa;
+    --vscode-sidebar-background: #282a36;
+    --vscode-list-hover-background: rgba(255, 255, 255, 0.05);
+    --vscode-list-active-selection-background: #094771;
+    --vscode-list-active-selection-foreground: #ffffff;
+    --vscode-list-inactive-selection-background: #37373d;
+    --vscode-focus-border: #007acc;
+    --vscode-button-background: #0e639c;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hover-background: #1177bb;
+    --vscode-editor-background: #1e1e1e;
+    --vscode-input-background: #3c3c3c;
+    --vscode-input-border: #5f5f5f;
+    --vscode-panel-border: #444444;
+    
+    /* 添加标题栏专用颜色 - 暗色主题 */
+    --vscode-header-background: #1e1e2e;
+    --vscode-header-border: #383850;
+
+    /* File icons colors for dark theme */
+    --icon-folder: #e2c08d;
+    --icon-folder-expanded: #e9cb9b;
+    --icon-json: #f9d277;
+    --icon-hover-opacity: 1;
+    --icon-arrow: #cccccc;
+}
+
+/* Explorer section */
+.explorer-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--vscode-sidebar-background);
+    color: var(--vscode-foreground);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    user-select: none;
+    border-right: 1px solid var(--vscode-panel-border);
+    padding-left: 5px;
+}
+
+/* Explorer header - 增强区分度 */
+.explorer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px 5px 12px;
+    height: 50px; /* 增高header */
+    font-size: 15px;
+    font-weight: 600; /* 加粗 */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-header-background); /* 不同的背景色 */
+    border-bottom: 1px solid var(--vscode-header-border); /* 添加底部边框 */
+    margin-bottom: 8px; /* 增加与内容区的间距 */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* 添加微妙阴影 */
+}
+
+/* 内容区域调整 */
+.explorer-container {
+    flex: 1;
+    overflow: auto;
+    padding: 0 0 4px 0;
+    margin-top: 2px; /* 与header有更明显的分隔 */
+}
+
+/* 修改动作按钮样式使其更符合header风格 */
+.explorer-action {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--vscode-foreground);
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: all 120ms ease;
+}
+
+.explorer-action:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+body.dark-theme .explorer-action:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.explorer-actions {
+    display: flex;
+    align-items: center;
+}
+
+.explorer-action {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--vscode-foreground);
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 100ms ease;
+}
+
+.explorer-action:hover {
+    opacity: 1;
+    background: var(--vscode-list-hover-background);
+}
+
+.explorer-action:focus {
+    outline: none;
+    opacity: 1;
+}
+
+.explorer-action .codicon {
+    font-size: 15px;
+}
+
+/* Explorer container */
+.explorer-container {
+    flex: 1;
+    overflow: auto;
+    padding: 4px 0;
+}
+
+/* File tree */
+.file-tree {
+    width: 100%;
+}
+
+/* Tree item styling */
+.tree-item {
+    display: flex;
+    align-items: center;
+    min-height: 22px;
+    position: relative;
+    cursor: pointer;
+    transition: background 80ms ease;
+}
+
+.tree-item:hover {
+    background: var(--vscode-list-hover-background);
+}
+
+.tree-item.active {
+    background: var(--vscode-list-active-selection-background);
+    color: var(--vscode-list-active-selection-foreground);
+}
+
+.tree-item.active .tree-icon .codicon,
+.tree-item.active .tree-expander .codicon {
+    opacity: 1 !important;
+    color: var(--vscode-list-active-selection-foreground) !important;
+}
+
+/* Selection indicator */
+.tree-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--vscode-focus-border);
+}
+
+/* Tree item components */
+.tree-indent {
+    width: 16px;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+/* Expander icon styling */
+.tree-expander {
+    width: 16px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tree-expander .codicon {
+    font-size: 15px;
+    color: var(--icon-arrow);
+    opacity: 0.8;
+    transform: rotate(0);
+    transition: transform 100ms ease, opacity 100ms ease;
+}
+
+.tree-expander:hover .codicon {
+    opacity: 1;
+}
+
+.tree-expander.expanded .codicon {
+    transform: rotate(90deg);
+}
+
+/* File/folder icon styling */
+.tree-icon {
+    width: 18px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px 0 2px;
+    flex-shrink: 0;
+}
+
+.tree-icon .codicon {
+    font-size: 15px;
+    transition: color 100ms ease;
+}
+
+.tree-icon .codicon-folder {
+    color: var(--icon-folder);
+}
+
+.tree-icon .codicon-folder-opened {
+    color: var(--icon-folder-expanded);
+}
+
+.tree-icon .codicon-json {
+    color: var(--icon-json);
+}
+
+/* Tree item label */
+.tree-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 8px 0 0;
+    line-height: 22px;
+}
+
+/* File and folder icons with hover effects */
+.tree-file-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    position: relative;
+}
+
+/* Vertical lines for folder structure */
+.tree-structure-line {
+    position: absolute;
+    left: 15px;
+    top: 22px;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(128, 128, 128, 0.2);
+    z-index: 0;
+}
+
+.tree-item:last-child > .tree-structure-line {
+    display: none;
+}
+
+/* Children container */
+.tree-children {
+    position: relative;
+    overflow: hidden;
+}
+
+.tree-children::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(128, 128, 128, 0.15);
+    z-index: 0;
+}
+
+body.dark-theme .tree-children::before {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Empty folder indication */
+.tree-item-empty {
+    padding: 2px 0 2px 56px;
+    color: var(--vscode-foreground);
+    opacity: 0.5;
+    font-style: italic;
+    font-size: 15px;
+}
+
+/* Empty explorer state */
+.explorer-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 200px;
+    padding: 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: var(--icon-folder);
+    opacity: 0.5;
+}
+
+.empty-text {
+    color: var(--vscode-foreground);
+    opacity: 0.8;
+    max-width: 240px;
+    margin: 0 auto;
+}
+
+.select-folder-btn {
+    margin-top: 20px;
+    padding: 8px 14px;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: 2px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.select-folder-btn:hover {
+    background: var(--vscode-button-hover-background);
+}
+
+.select-folder-btn .codicon {
+    font-size: 15px;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    color: var(--vscode-foreground);
+    opacity: 0.7;
+}
+
+.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: var(--vscode-focus-border);
+    border-left-color: var(--vscode-focus-border);
+    border-radius: 50%;
+    animation: spinner-rotation 0.8s linear infinite;
+}
+
+@keyframes spinner-rotation {
+    to { transform: rotate(360deg); }
+}
+
+/* Custom scrollbar */
+.explorer-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.explorer-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.explorer-container::-webkit-scrollbar-thumb {
+    background-color: rgba(121, 121, 121, 0.2);
+    border-radius: 4px;
+    border: 2px solid var(--vscode-sidebar-background);
+    background-clip: padding-box;
+}
+
+.explorer-container::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(121, 121, 121, 0.4);
+}
+
+/* File type-specific icons */
+.json-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23f5c43c"><path d="M5,3H7V5H5V10A2,2 0 0,1 3,12A2,2 0 0,1 5,14V19H7V21H5C3.93,20.73 3,20.1 3,19V15A2,2 0 0,0 1,13H0V11H1A2,2 0 0,0 3,9V5A2,2 0 0,1 5,3M19,3A2,2 0 0,1 21,5V9A2,2 0 0,0 23,11H24V13H23A2,2 0 0,0 21,15V19A2,2 0 0,1 19,21H17V19H19V14A2,2 0 0,1 21,12A2,2 0 0,1 19,10V5H17V3H19M12,15A1,1 0 0,1 13,16A1,1 0 0,1 12,17A1,1 0 0,1 11,16A1,1 0 0,1 12,15M8,15A1,1 0 0,1 9,16A1,1 0 0,1 8,17A1,1 0 0,1 7,16A1,1 0 0,1 8,15M16,15A1,1 0 0,1 17,16A1,1 0 0,1 16,17A1,1 0 0,1 15,16A1,1 0 0,1 16,15Z" /></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+/* Hover effect for the entire row */
+.tree-item-hover {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: transparent;
+    transition: background 120ms ease;
+    z-index: -1;
+}
+
+.tree-item:hover .tree-item-hover {
+    background: var(--vscode-list-hover-background);
+}
+
+/* Animations for expansion/collapse */
+.tree-children {
+    max-height: 0;
+    transition: max-height 120ms ease-out;
+}
+
+.tree-children.expanded {
+    max-height: 9999px;
+    transition: max-height 300ms ease-in;
+}

@@ -7,6 +7,7 @@ export class ControlsManager {
         this.jsonEditor = jsonEditor;
         
         this.gizmoLast = new Map();
+        this.currentDragPartId = null;
 
         // 控制手柄相关属性
         this.gizmo = null;
@@ -258,6 +259,14 @@ export class ControlsManager {
         this.dragStartPosition.copy(this.gizmoLast.get(object.uuid) || object.postion);
         this.dragStartObjPosition.copy(object.position);
         this.dragStartMousePosition.set(mouseX, mouseY);
+
+        const partId = this.renderer.getPartIdFromObject(object);
+
+        // 如果找到部件ID并且有JsonEditor，则跳转
+        if (partId && this.renderer.jsonEditor) {
+            console.log(`选中部件: ${partId}`);
+            this.renderer.jsonEditor.scrollToPartId(partId);
+        }
         
         // 禁用轨道控制器
         this.renderer.sceneManager.controls.enabled = false;
@@ -526,8 +535,6 @@ export class ControlsManager {
                         const axisIndex = {x: 0, y: 2, z: 1}[this.dragAxis];
                         const InitPosition = this.renderer.getInitialPosition(object);
                         const roundedValue = Math.round((object.position[this.dragAxis] + InitPosition[axisIndex]) * 1000) / 1000;
-                        
-                        console.log('roundedValue is', roundedValue);
 
                         // 只在值有变化时更新
                         if (Math.abs(roundedValue - part.coordinate_system["Translation Vector"][axisIndex]) >= 1e-6) {

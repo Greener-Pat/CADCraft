@@ -711,7 +711,18 @@ input:checked + .slider:before {
 
 /* 优化 CodeMirror 中的标点符号和引号显示 */
 
-/* 基础字体设置 - 设置更美观的字体 */
+/* 基础字体设置 */
+.CodeMirror {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    letter-spacing: 0.06em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* 移除!important让主题可以覆盖 */
+}
+
+/* 基础字体设置 - 恢复!important确保一致性 */
 .CodeMirror {
     font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace !important;
     font-size: 12px !important;
@@ -721,81 +732,206 @@ input:checked + .slider:before {
     -moz-osx-font-smoothing: grayscale !important;
 }
 
-/* 引号和冒号样式 - 使用非常具体的选择器 */
-.CodeMirror .cm-string {
-    color: #64b5f6 !important; /* 字符串颜色 */
-}
-
-/* 引号特别处理 - 给引号单独设置样式 */
-.CodeMirror .cm-string.cm-property,
-.CodeMirror .cm-string span:first-child,
-.CodeMirror .cm-string span:last-child {
-    color: #ff9cac !important; /* 引号用不同颜色 */
-    font-weight: 500 !important; /* 略微加粗 */
-}
-
-/* 属性名样式 */
-.CodeMirror .cm-property {
-    color: #9cdcfe !important;
-    font-weight: 500 !important;
-}
-
-/* 标点符号和括号样式 */
-.CodeMirror .cm-punctuation,
-.CodeMirror .cm-delimiter,
-.CodeMirror .cm-bracket,
-.CodeMirror .cm-operator {
-    color: #e57373 !important; /* 标点符号颜色 */
-    font-weight: 500 !important; /* 加粗标点符号 */
-}
-
-/* 数值样式 */
-.CodeMirror .cm-number,
-.CodeMirror .cm-atom {
-    color: #81c784 !important; /* 数值颜色 */
-}
-
-/* 确保引号看起来更好 */
-.CodeMirror-line {
-    font-feature-settings: "liga" 0, "calt" 0 !important; /* 禁用连字，可能导致引号显示异常 */
-}
-
-/* 为整个编辑器设置更好的引号绘制 */
+/* 其他样式保持不变，但确保字体不受影响 */
+body.dark-theme .CodeMirror,
+body:not(.dark-theme) .CodeMirror,
+.cm-s-dracula.CodeMirror,
 .CodeMirror {
-    text-rendering: optimizeLegibility !important;
+    /* 确保字体统一 */
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0.06em !important;
+}
+
+/* 确保编辑器内容字体一致 */
+.CodeMirror .CodeMirror-code,
+.CodeMirror .CodeMirror-line,
+.CodeMirror .cm-string,
+.CodeMirror .cm-property,
+.CodeMirror .cm-number,
+.CodeMirror .cm-atom,
+.CodeMirror .cm-comment,
+.CodeMirror .cm-keyword,
+.CodeMirror .cm-variable,
+.CodeMirror .cm-operator,
+.CodeMirror .cm-punctuation,
+.CodeMirror .cm-bracket {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace !important;
+}
+
+/* 行号字体也保持一致 */
+.CodeMirror-linenumber {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace !important;
+    font-size: 11px !important;
+}
+
+/* 根据数据属性区分暗/亮模式 */
+:root {
+    --string-color-dark: #64b5f6;
+    --string-color-light: #0d47a1;
+    
+    --quote-color-dark: #ff9cac;
+    --quote-color-light: #c62828;
+    
+    --property-color-dark: #9cdcfe;
+    --property-color-light: #0277bd;
+    
+    --punctuation-color-dark: #e57373;
+    --punctuation-color-light: #b71c1c;
+    
+    --number-color-dark: #81c784;
+    --number-color-light: #2e7d32;
+    
+    --background-color-dark: #282a36;
+    --background-color-light: #fafafa;
+    
+    --text-color-dark: #f8f8f2;
+    --text-color-light: #424242;
+    
+    --gutter-bg-dark: #1e1f29;
+    --gutter-bg-light: #f0f0f0;
+    
+    --gutter-text-dark: #6d8a88;
+    --gutter-text-light: #999;
+}
+
+/* 暗色模式样式 */
+body.dark-theme .CodeMirror,
+.cm-s-dracula.CodeMirror {
+    background-color: var(--background-color-dark);
+    color: var(--text-color-dark);
+}
+
+body.dark-theme .CodeMirror .cm-string,
+.cm-s-dracula .cm-string {
+    color: var(--string-color-dark);
+}
+
+body.dark-theme .CodeMirror .cm-string.cm-property,
+body.dark-theme .CodeMirror .cm-string span:first-child,
+body.dark-theme .CodeMirror .cm-string span:last-child,
+.cm-s-dracula .cm-string.cm-property,
+.cm-s-dracula .cm-string span:first-child,
+.cm-s-dracula .cm-string span:last-child {
+    color: var(--quote-color-dark);
+    font-weight: 500;
+}
+
+body.dark-theme .CodeMirror .cm-property,
+.cm-s-dracula .cm-property {
+    color: var(--property-color-dark);
+    font-weight: 500;
+}
+
+body.dark-theme .CodeMirror .cm-punctuation,
+body.dark-theme .CodeMirror .cm-delimiter,
+body.dark-theme .CodeMirror .cm-bracket,
+body.dark-theme .CodeMirror .cm-operator,
+.cm-s-dracula .cm-punctuation,
+.cm-s-dracula .cm-delimiter,
+.cm-s-dracula .cm-bracket,
+.cm-s-dracula .cm-operator {
+    color: var(--punctuation-color-dark);
+    font-weight: 500;
+}
+
+body.dark-theme .CodeMirror .cm-number,
+body.dark-theme .CodeMirror .cm-atom,
+.cm-s-dracula .cm-number,
+.cm-s-dracula .cm-atom {
+    color: var(--number-color-dark);
+}
+
+body.dark-theme .CodeMirror-gutters,
+.cm-s-dracula .CodeMirror-gutters {
+    background-color: var(--gutter-bg-dark);
+}
+
+body.dark-theme .CodeMirror-linenumber,
+.cm-s-dracula .CodeMirror-linenumber {
+    color: var(--gutter-text-dark);
+}
+
+/* 亮色模式样式 */
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) {
+    background-color: var(--background-color-light);
+    color: var(--text-color-light);
+    border: 1px solid #e0e0e0;
+}
+
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-string {
+    color: var(--string-color-light);
+}
+
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-string.cm-property,
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-string span:first-child,
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-string span:last-child {
+    color: var(--quote-color-light);
+    font-weight: 500;
+}
+
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-property {
+    color: var(--property-color-light);
+    font-weight: 500;
+}
+
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-punctuation,
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-delimiter,
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-bracket,
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-operator {
+    color: var(--punctuation-color-light);
+    font-weight: 500;
+}
+
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-number,
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .cm-atom {
+    color: var(--number-color-light);
+}
+
+body:not(.dark-theme) .CodeMirror-gutters:not(.cm-s-dracula .CodeMirror-gutters) {
+    background-color: var(--gutter-bg-light);
+    border-right: 1px solid #e0e0e0;
+}
+
+body:not(.dark-theme) .CodeMirror-linenumber:not(.cm-s-dracula .CodeMirror-linenumber) {
+    color: var(--gutter-text-light);
+}
+
+/* 共享样式 */
+.CodeMirror-line {
+    font-feature-settings: "liga" 0, "calt" 0;
+    text-rendering: optimizeLegibility;
 }
 
 /* 匹配的括号高亮 */
 .CodeMirror .CodeMirror-matchingbracket {
-    color: #ffeb3b !important;
-    background-color: rgba(255, 235, 59, 0.2) !important;
-    font-weight: bold !important;
+    text-decoration: underline;
+    font-weight: bold;
 }
 
-/* 对不同层级的缩进添加微弱的边框，提高可读性 */
-.CodeMirror-line {
+body.dark-theme .CodeMirror .CodeMirror-matchingbracket,
+.cm-s-dracula .CodeMirror-matchingbracket {
+    color: #ffeb3b !important;
+    background-color: rgba(255, 235, 59, 0.2);
+}
+
+body:not(.dark-theme) .CodeMirror:not(.cm-s-dracula) .CodeMirror-matchingbracket {
+    color: #d32f2f !important;
+    background-color: rgba(211, 47, 47, 0.1);
+}
+
+/* 对不同层级的缩进添加微弱的边框 */
+body.dark-theme .CodeMirror-line,
+.cm-s-dracula .CodeMirror-line {
     border-left: 1px solid rgba(200, 200, 200, 0.03);
 }
 
-/* Dracula 主题的覆盖样式 - 如果您使用其他主题，可能需要调整 */
-.cm-s-dracula .cm-string {
-    color: #64b5f6 !important;
+body:not(.dark-theme) .CodeMirror-line:not(.cm-s-dracula .CodeMirror-line) {
+    border-left: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-.cm-s-dracula .cm-property {
-    color: #9cdcfe !important;
-}
-
-.cm-s-dracula .cm-punctuation,
-.cm-s-dracula .cm-bracket {
-    color: #e57373 !important;
-}
-
-/* 适应黑暗模式 */
-body.dark-theme .CodeMirror {
-    border-color: var(--border-color);
-}
-
+/* 状态消息样式 */
 .status-message {
     margin-top: 5px;
     font-size: 10px;
@@ -812,11 +948,94 @@ body.dark-theme .CodeMirror {
     color: var(--success-color, hsl(145, 63%, 49%));
 }
 
+/* 高亮样式调整，使其在亮色模式中也可见 */
+.json-part-highlight {
+    background-color: rgba(65, 105, 225, 0.3);
+    font-weight: bold; 
+    border-radius: 3px; 
+    padding: 2px 0;
+}
+
+body:not(.dark-theme) .json-part-highlight {
+    background-color: rgba(25, 118, 210, 0.15);
+    border: 1px solid rgba(25, 118, 210, 0.3);
+}
+
+/* 轴高亮样式 */
+body.dark-theme .json-axis-highlight-x,
+.cm-s-dracula .json-axis-highlight-x {
+    background-color: rgba(255, 100, 100, 0.6);
+}
+
+body:not(.dark-theme) .json-axis-highlight-x:not(.cm-s-dracula *) {
+    background-color: rgba(244, 67, 54, 0.3);
+    border: 1px solid rgba(244, 67, 54, 0.5);
+    color: #b71c1c;
+}
+
+body.dark-theme .json-axis-highlight-y,
+.cm-s-dracula .json-axis-highlight-y {
+    background-color: rgba(100, 255, 100, 0.6);
+}
+
+body:not(.dark-theme) .json-axis-highlight-y:not(.cm-s-dracula *) {
+    background-color: rgba(76, 175, 80, 0.3);
+    border: 1px solid rgba(76, 175, 80, 0.5);
+    color: #1b5e20;
+}
+
+body.dark-theme .json-axis-highlight-z,
+.cm-s-dracula .json-axis-highlight-z {
+    background-color: rgba(100, 100, 255, 0.6);
+}
+
+body:not(.dark-theme) .json-axis-highlight-z:not(.cm-s-dracula *) {
+    background-color: rgba(33, 150, 243, 0.3);
+    border: 1px solid rgba(33, 150, 243, 0.5);
+    color: #0d47a1;
+}
+
 .editor-controls {
     display: flex;
     justify-content: space-between;
     gap: 10px;
     margin-top: 5px;
+}
+
+/* 响应式布局调整 */
+@media (max-width: 768px) {
+    .CodeMirror {
+        height: 200px;
+    }
+    
+    .editor-controls {
+        flex-direction: column;
+    }
+    
+    .editor-controls button {
+        width: 100%;
+    }
+}
+
+/* 添加到您的CSS中 */
+.json-part-highlight {
+  animation: highlight-json-part 3s ease-in-out;
+}
+
+@keyframes highlight-json-part {
+  0% { background-color: rgba(65, 105, 225, 0.7); }
+  20% { background-color: rgba(65, 105, 225, 0.5); }
+  100% { background-color: rgba(65, 105, 225, 0.2); }
+}
+
+/* 确保CodeMirror折叠功能有正确的样式 */
+.CodeMirror-foldmarker {
+  color: #88f;
+  text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
+  font-family: arial;
+  line-height: .3;
+  cursor: pointer;
+  padding: 0 3px;
 }
 
 /* 响应式布局调整 */
