@@ -30,6 +30,7 @@ async function initApp() {
     window.renderer = renderer;
     
     jsonEditor = renderer.jsonEditor;
+    window.jsonEditor =  jsonEditor;
 
     // 加载主题首选项
     loadThemePreference();
@@ -129,12 +130,571 @@ async function initApp() {
             }
         });
     }
+
+    // 初始化文件管理器
+    fileExplorer.init();
+    window.fileExplorer = fileExplorer;
     
     // 自动加载示例模型
     setTimeout(loadSampleModel, 500);
     
     updateStatus('初始化完成');
 }
+
+// VS Code 风格文件资源管理器 - 美化版
+const fileExplorer = {
+    rootHandle: null,
+    expandedFolders: new Set(),
+    selectedFile: null,
+    isLoading: false,
+    
+    // 初始化文件资源管理器
+    init: function() {
+        // 绑定按钮事件
+        document.getElementById('openFolderBtn')?.addEventListener('click', () => this.openFolder());
+        document.getElementById('selectFolderBtn')?.addEventListener('click', () => this.openFolder());
+        document.getElementById('refreshBtn')?.addEventListener('click', () => this.refresh());
+        document.getElementById('collapseAllBtn')?.addEventListener('click', () => this.collapseAll());
+        
+        // 如果已经有文件夹信息存储在本地存储中，尝试恢复
+        this.tryRestoreLastSession();
+        
+        console.log('文件资源管理器初始化完成');
+    },
+    
+    // 尝试恢复上次会话
+    async tryRestoreLastSession() {
+        // 这部分可以扩展为从localStorage读取上次打开的文件夹和展开状态
+        // 目前先保持简单实现
+    },
+    
+    // 打开根文件夹
+    async openFolder() {
+        try {
+            if (this.isLoading) return;
+            this.isLoading = true;
+            
+            // 检查浏览器支持
+            if (!('showDirectoryPicker' in window)) {
+                alert('您的浏览器不支持文件系统访问API，请使用Chrome或Edge浏览器。');
+                this.isLoading = false;
+                return;
+            }
+            
+            // 显示文件夹选择对话框
+            this.rootHandle = await window.showDirectoryPicker();
+            
+            // 重置状态
+            this.expandedFolders.clear();
+            this.selectedFile = null;
+            
+            // 加载并显示文件树
+            await this.renderFileTree();
+            this.isLoading = false;
+            
+            updateStatus(`已打开文件夹: ${this.rootHandle.name}`);
+        } catch (error) {
+            this.isLoading = false;
+            if (error.name !== 'AbortError') {
+                console.error('打开文件夹失败:', error);
+                updateStatus('打开文件夹失败');
+            }
+        }
+    },
+    
+    // 刷新资源管理器
+    async refresh() {
+        if (!this.rootHandle || this.isLoading) return;
+        
+        this.isLoading = true;
+        await this.renderFileTree(true); // 保留展开状态
+        this.isLoading = false;
+        
+        updateStatus('资源管理器已刷新');
+    },
+    
+    // 折叠所有文件夹
+    collapseAll() {
+        if (!this.rootHandle) return;
+        
+        // 保存当前滚动位置
+        const container = document.querySelector('.explorer-container');
+        const scrollTop = container?.scrollTop || 0;
+        
+        this.expandedFolders.clear();
+        this.renderFileTree();
+        
+        // 恢复滚动位置
+        setTimeout(() => {
+            if (container) container.scrollTop = scrollTop;
+        }, 50);
+        
+        updateStatus('所有文件夹已折叠');
+    },
+    
+    // 渲染文件树
+    async renderFileTree(keepExpanded = false) {
+        const fileTree = document.getElementById('fileTree');
+        if (!fileTree || !this.rootHandle) return;
+        
+        // 保存当前滚动位置
+        const container = document.querySelector('.explorer-container');
+        const scrollTop = container?.scrollTop || 0;
+        
+        // 显示加载状态
+        fileTree.innerHTML = `
+            <div class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <span>正在加载文件...</span>
+            </div>
+        `;
+        
+        try {
+            // 保存扩展状态的副本，如果需要的话
+            const savedExpanded = keepExpanded ? new Set(this.expandedFolders) : null;
+            
+            // 清空文件树
+            fileTree.innerHTML = '';
+            
+            // 获取根目录内容并排序
+            const entries = await this.getFolderEntries(this.rootHandle);
+            
+            if (entries.length === 0) {
+                // 显示空文件夹状态
+                fileTree.innerHTML = `
+                    <div class="explorer-empty">
+                        <i class="codicon codicon-folder-opened empty-icon"></i>
+                        <div class="empty-text">
+                            <p>文件夹中没有JSON文件或子文件夹</p>
+                        </div>
+                        <button id="parentFolderBtn" class="select-folder-btn">
+                            <i class="codicon codicon-folder-opened"></i>
+                            <span>选择上级文件夹</span>
+                        </button>
+                    </div>
+                `;
+                
+                // 添加按钮事件
+                document.getElementById('parentFolderBtn')?.addEventListener('click', () => this.openFolder());
+                return;
+            }
+            
+            // 恢复扩展状态，如果需要的话
+            if (keepExpanded && savedExpanded) {
+                this.expandedFolders = savedExpanded;
+            }
+            
+            // 添加文件夹标题
+            const folderHeader = document.createElement('div');
+            folderHeader.className = 'tree-folder-header';
+            folderHeader.innerHTML = `
+                <div class="tree-item" style="padding-left: 8px; font-weight: 600;">
+                    <div class="tree-icon">
+                        <i class="codicon codicon-root-folder" style="color: var(--icon-folder); font-size: 18px;"></i>
+                    </div>
+                    <div class="tree-label">${this.rootHandle.name}</div>
+                </div>
+            `;
+            fileTree.appendChild(folderHeader);
+            
+            // 为每个条目创建树节点
+            for (const entry of entries) {
+                await this.createTreeNode(entry, fileTree, 0);
+            }
+            
+            // 恢复滚动位置
+            setTimeout(() => {
+                if (container) container.scrollTop = scrollTop;
+            }, 50);
+            
+        } catch (error) {
+            console.error('渲染文件树失败:', error);
+            fileTree.innerHTML = `
+                <div class="explorer-empty">
+                    <i class="codicon codicon-error empty-icon" style="color: #e51400;"></i>
+                    <div class="empty-text">
+                        <p>无法读取文件夹内容</p>
+                        <p style="font-size: 12px; opacity: 0.8;">${error.message}</p>
+                    </div>
+                    <button id="retryFolderBtn" class="select-folder-btn">
+                        <i class="codicon codicon-debug-restart"></i>
+                        <span>重试</span>
+                    </button>
+                </div>
+            `;
+            
+            // 添加重试按钮事件
+            document.getElementById('retryFolderBtn')?.addEventListener('click', () => this.refresh());
+        }
+    },
+    
+    // 获取文件夹内的条目并排序（只返回文件夹和JSON文件）
+    async getFolderEntries(folderHandle) {
+        const entries = [];
+        
+        // 读取文件夹内容
+        for await (const entry of folderHandle.values()) {
+            if (entry.kind === 'directory' || 
+                (entry.kind === 'file' && entry.name.toLowerCase().endsWith('.json'))) {
+                entries.push(entry);
+            }
+        }
+        
+        // 按类型和名称排序（文件夹在前）
+        return entries.sort((a, b) => {
+            if (a.kind !== b.kind) {
+                return a.kind === 'directory' ? -1 : 1;
+            }
+            return a.name.localeCompare(b.name, undefined, { numeric: true });
+        });
+    },
+    
+    // 创建树节点
+    async createTreeNode(entry, parentElement, level) {
+        const entryPath = await this.getEntryPath(entry);
+        const isExpanded = this.expandedFolders.has(entryPath);
+        
+        // 创建树节点容器
+        const treeItem = document.createElement('div');
+        treeItem.className = 'tree-item';
+        treeItem.dataset.path = entryPath;
+        treeItem.dataset.type = entry.kind;
+        
+        // 被选中文件高亮
+        if (this.selectedFile && 
+            entry.kind === 'file' && 
+            entryPath === await this.getEntryPath(this.selectedFile)) {
+            treeItem.classList.add('active');
+        }
+        
+        // 创建悬停效果容器
+        const hoverElement = document.createElement('div');
+        hoverElement.className = 'tree-item-hover';
+        treeItem.appendChild(hoverElement);
+        
+        // 添加缩进
+        let html = '';
+        for (let i = 0; i < level; i++) {
+            html += '<div class="tree-indent"></div>';
+        }
+        
+        // 根据类型添加内容
+        if (entry.kind === 'directory') {
+            // 文件夹节点
+            html += `
+                <div class="tree-expander ${isExpanded ? 'expanded' : ''}">
+                    <i class="codicon codicon-chevron-right"></i>
+                </div>
+                <div class="tree-icon">
+                    <i class="codicon ${isExpanded ? 'codicon-folder-opened' : 'codicon-folder'}"></i>
+                </div>
+                <div class="tree-label">${entry.name}</div>
+            `;
+            
+            treeItem.innerHTML += html;
+            parentElement.appendChild(treeItem);
+            
+            // 为展开/折叠图标添加单独的点击事件
+            const expander = treeItem.querySelector('.tree-expander');
+            if (expander) {
+                expander.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await this.toggleFolder(entry, treeItem, level);
+                });
+            }
+            
+            // 为文件夹标签添加点击事件
+            treeItem.addEventListener('click', async (e) => {
+                // 如果点击的是展开图标，已经由上面的事件处理
+                if (e.target.closest('.tree-expander')) return;
+                
+                // 否则，展开或折叠文件夹
+                await this.toggleFolder(entry, treeItem, level);
+            });
+            
+            // 双击事件 - 可实现展开所有子文件夹
+            treeItem.addEventListener('dblclick', async (e) => {
+                e.stopPropagation();
+                await this.expandAllSubfolders(entry, treeItem, level);
+            });
+            
+            // 如果已展开，则递归显示子项
+            if (isExpanded) {
+                const childContainer = document.createElement('div');
+                childContainer.className = 'tree-children';
+                parentElement.appendChild(childContainer);
+                
+                try {
+                    // 获取子项
+                    const childEntries = await this.getFolderEntries(entry);
+                    
+                    if (childEntries.length === 0) {
+                        // 添加空文件夹提示
+                        const emptyItem = document.createElement('div');
+                        emptyItem.className = 'tree-item-empty';
+                        emptyItem.textContent = '空文件夹';
+                        childContainer.appendChild(emptyItem);
+                    } else {
+                        // 创建子项
+                        for (const childEntry of childEntries) {
+                            await this.createTreeNode(childEntry, childContainer, level + 1);
+                        }
+                    }
+                    
+                    // 添加展开的类以触发动画
+                    setTimeout(() => {
+                        childContainer.classList.add('expanded');
+                    }, 10);
+                    
+                } catch (error) {
+                    console.error('加载子文件夹失败:', error);
+                    childContainer.innerHTML = `
+                        <div class="tree-item-empty" style="color: #e51400;">
+                            加载失败 - ${error.message || '未知错误'}
+                        </div>
+                    `;
+                }
+            }
+            
+        } else if (entry.kind === 'file') {
+            // JSON文件节点
+            html += `
+                <div class="tree-expander"></div>
+                <div class="tree-icon">
+                    <i class="codicon codicon-json"></i>
+                </div>
+                <div class="tree-label">${entry.name}</div>
+            `;
+            
+            treeItem.innerHTML += html;
+            parentElement.appendChild(treeItem);
+            
+            // 添加点击事件来加载文件
+            treeItem.addEventListener('click', async () => {
+                await this.loadJsonFile(entry, treeItem);
+            });
+        }
+    },
+    
+    // 切换文件夹展开/折叠状态
+    async toggleFolder(folderHandle, folderElement, level) {
+        const path = await this.getEntryPath(folderHandle);
+        const isExpanded = this.expandedFolders.has(path);
+        
+        // 保存当前滚动位置
+        const container = document.querySelector('.explorer-container');
+        const scrollTop = container?.scrollTop || 0;
+        
+        // 更新展开状态
+        if (isExpanded) {
+            this.expandedFolders.delete(path);
+            
+            // 找到并移除子项容器
+            let nextElement = folderElement.nextElementSibling;
+            if (nextElement && nextElement.classList.contains('tree-children')) {
+                nextElement.classList.remove('expanded');
+                
+                // 给动画一点时间，然后移除元素
+                setTimeout(() => {
+                    nextElement.remove();
+                    
+                    // 更新图标
+                    const expander = folderElement.querySelector('.tree-expander');
+                    const folderIcon = folderElement.querySelector('.codicon-folder-opened');
+                    
+                    if (expander) expander.classList.remove('expanded');
+                    if (folderIcon) {
+                        folderIcon.classList.remove('codicon-folder-opened');
+                        folderIcon.classList.add('codicon-folder');
+                    }
+                }, 100);
+            }
+        } else {
+            this.expandedFolders.add(path);
+            
+            // 创建子项容器
+            const childContainer = document.createElement('div');
+            childContainer.className = 'tree-children';
+            
+            // 插入到当前元素之后
+            folderElement.after(childContainer);
+            
+            try {
+                // 更新图标
+                const expander = folderElement.querySelector('.tree-expander');
+                const folderIcon = folderElement.querySelector('.codicon-folder');
+                
+                if (expander) expander.classList.add('expanded');
+                if (folderIcon) {
+                    folderIcon.classList.remove('codicon-folder');
+                    folderIcon.classList.add('codicon-folder-opened');
+                }
+                
+                // 获取子项
+                const childEntries = await this.getFolderEntries(folderHandle);
+                
+                if (childEntries.length === 0) {
+                    // 添加空文件夹提示
+                    const emptyItem = document.createElement('div');
+                    emptyItem.className = 'tree-item-empty';
+                    emptyItem.textContent = '空文件夹';
+                    childContainer.appendChild(emptyItem);
+                } else {
+                    // 创建子项
+                    for (const childEntry of childEntries) {
+                        await this.createTreeNode(childEntry, childContainer, level + 1);
+                    }
+                }
+                
+                // 添加展开的类以触发动画
+                setTimeout(() => {
+                    childContainer.classList.add('expanded');
+                }, 10);
+                
+            } catch (error) {
+                console.error('加载子文件夹失败:', error);
+                childContainer.innerHTML = `
+                    <div class="tree-item-empty" style="color: #e51400;">
+                        加载失败 - ${error.message || '未知错误'}
+                    </div>
+                `;
+                
+                // 如果失败，还原图标
+                const expander = folderElement.querySelector('.tree-expander');
+                const folderIcon = folderElement.querySelector('.codicon-folder-opened');
+                
+                if (expander) expander.classList.remove('expanded');
+                if (folderIcon) {
+                    folderIcon.classList.remove('codicon-folder-opened');
+                    folderIcon.classList.add('codicon-folder');
+                }
+            }
+        }
+        
+        // 恢复滚动位置
+        setTimeout(() => {
+            if (container) container.scrollTop = scrollTop;
+        }, 50);
+    },
+    
+    // 展开所有子文件夹（双击时触发）
+    async expandAllSubfolders(folderHandle, folderElement, level) {
+        // 先确保当前文件夹是展开的
+        const path = await this.getEntryPath(folderHandle);
+        const isExpanded = this.expandedFolders.has(path);
+        
+        if (!isExpanded) {
+            await this.toggleFolder(folderHandle, folderElement, level);
+        }
+        
+        // 查找所有子文件夹
+        const childFolders = [];
+        try {
+            for await (const entry of folderHandle.values()) {
+                if (entry.kind === 'directory') {
+                    childFolders.push(entry);
+                }
+            }
+            
+            // 展开每个子文件夹
+            for (const childFolder of childFolders) {
+                const childPath = await this.getEntryPath(childFolder);
+                this.expandedFolders.add(childPath);
+            }
+            
+            // 重新渲染以应用更改
+            if (childFolders.length > 0) {
+                const childContainer = folderElement.nextElementSibling;
+                if (childContainer && childContainer.classList.contains('tree-children')) {
+                    childContainer.innerHTML = '';
+                    
+                    // 获取所有子条目
+                    const childEntries = await this.getFolderEntries(folderHandle);
+                    
+                    // 重新创建子节点
+                    for (const childEntry of childEntries) {
+                        await this.createTreeNode(childEntry, childContainer, level + 1);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('展开子文件夹失败:', error);
+        }
+    },
+    
+    // 加载JSON文件
+    async loadJsonFile(fileHandle, fileElement) {
+        try {
+            // 添加加载指示器
+            fileElement.classList.add('loading');
+            const label = fileElement.querySelector('.tree-label');
+            const originalText = label.textContent;
+            label.innerHTML = `<span style="opacity: 0.7;">加载中...</span>`;
+            
+            // 更新选中状态
+            document.querySelectorAll('.tree-item.active').forEach(el => {
+                el.classList.remove('active');
+            });
+            fileElement.classList.add('active');
+            
+            // 保存当前选中的文件
+            this.selectedFile = fileHandle;
+            
+            updateStatus(`正在加载: ${fileHandle.name}`);
+            
+            // 获取文件内容
+            const file = await fileHandle.getFile();
+            const content = await file.text();
+            
+            try {
+                // 解析JSON
+                const jsonData = JSON.parse(content);
+                
+                // 使用正确的API加载数据
+                if (window.jsonEditor) {
+                    window.jsonEditor.setJson(jsonData);
+                }
+                
+                if (window.renderer) {
+                    window.renderer.renderCADFromJson(jsonData);
+                }
+                
+                // 恢复原始文本并移除加载状态
+                label.textContent = originalText;
+                fileElement.classList.remove('loading');
+                
+                updateStatus(`已加载: ${fileHandle.name}`);
+                updateModelInfo(jsonData);
+                
+                // 添加到最近打开的文件（如果需要）
+                this.addToRecentFiles(fileHandle);
+            } catch (jsonError) {
+                console.error('JSON解析失败:', jsonError);
+                label.textContent = originalText;
+                fileElement.classList.remove('loading');
+                updateStatus(`无效的JSON文件: ${fileHandle.name}`);
+            }
+        } catch (error) {
+            console.error('读取文件失败:', error);
+            const label = fileElement.querySelector('.tree-label');
+            if (label) label.textContent = fileElement.dataset.originalName || entry.name;
+            fileElement.classList.remove('loading');
+            updateStatus(`无法读取文件: ${fileHandle.name}`);
+        }
+    },
+    
+    // 添加到最近打开的文件列表
+    addToRecentFiles(fileHandle) {
+        // 此功能可以扩展为存储最近打开的文件
+        // 例如可以存储在localStorage中
+    },
+    
+    // 获取条目的唯一路径
+    async getEntryPath(entry) {
+        if (!entry) return '';
+        return `${entry.kind}://${entry.name}`;
+    }
+};
 
 // 辅助函数 - 将网格与边界同步
 function syncGridWithBoundaries() {
