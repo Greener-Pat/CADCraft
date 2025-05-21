@@ -1719,7 +1719,7 @@ const sidebarRating = {
                     this.startTimer();
                 }
 
-                this.updateModelInfo(jsonData);
+                updateModelInfo(jsonData);
                 
                 updateStatus(`正在评分: ${fileInfo.path}`);
             } catch (jsonError) {
