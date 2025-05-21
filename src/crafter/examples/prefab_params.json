@@ -35,6 +35,13 @@
             "description": "tower4",
             "params": [0.1, 0.3],
             "position": [0.0, 0.3, 0.0]
+        },
+        "part_6": {
+            "id": "6",
+            "type": "cuboid",
+            "description": "house on the main body of castle",
+            "params": [0.2, 0.2, 0.1],
+            "position": [0.1, 0.1, 0.2]
         }
     },
     "positional relationship": [
@@ -72,6 +79,15 @@
                 "x": ["right", "intersect"],
                 "y": ["back", "seperate"],
                 "z": ["none", "intersect"]
+            }
+        },
+        {
+            "from": 1,
+            "to": 6,
+            "relationship": {
+                "x": ["center", "intersect"],
+                "y": ["center", "intersect"],
+                "z": ["up", "seperate"]
             }
         }
     ]

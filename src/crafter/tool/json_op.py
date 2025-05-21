@@ -20,7 +20,7 @@ def save_json(json_dic, filepath):
 	with open(filepath, "w", encoding='utf-8') as file:
 		json.dump(json_dic, file, indent=4)
 	print(f"Save to {filepath}")
-		
+
 def json_generate(prompt, model_call=kimi, limit=3, save=True):
 	count = 0
 	history = []
@@ -41,5 +41,9 @@ def json_generate(prompt, model_call=kimi, limit=3, save=True):
 			print("Go on...")
 			print(gene_s)
 			prompt = "继续生成"
+
 	print("Fail")
-	return gene_s, False
+	failpath = available_path("../fail/")
+	with open(failpath, "w", encoding="utf-8") as file:
+		file.write(gene_s)
+	return failpath, False

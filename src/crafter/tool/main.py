@@ -1,43 +1,45 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import generate
 from json_op import available_path, save_json
+from flask_cors import CORS
+import os
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route('/api/generate', methods=['POST'])
+# 设置输出文件夹路径
+OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), '../outputs')
+
+@app.route('/api/generate', methods=['POST','GET'])
 def handle_generation():
     try:
-        # 获取请求数据
         data = request.json
         if not data:
             return jsonify({"status": "fail", "message": "No JSON data provided"}), 400
         
-        # 获取参数
-        desire = data.get('desire', '')
+        desire = data.get('desire', '一根竖直的杆子，由三个同轴不同半径的圆柱体组成，圆柱面上下对齐拼接但相互不相交')
         whole = data.get('whole', False)
         div = data.get('div', 'gene')
         merge = data.get('merge', 'hand')
         
-        # 验证必要参数
         if not desire:
             return jsonify({"status": "fail", "message": "No description provided"}), 400
         
-        # 验证参数值的合法性
         if div not in ['gene', 'clip', 'prefabs']:
             return jsonify({"status": "fail", "message": "Invalid division method"}), 400
             
         if merge not in ['params', 'hand']:
             return jsonify({"status": "fail", "message": "Invalid merge method"}), 400
         
-        # 调用生成函数
         if whole:
             final_dic, res = generate.whole_generate(desire)
+            fail_s = f"Fail to generate a whole CAD program, the result has been saved to {final_dic}"
             gen_method = "whole"
         else:
             final_dic, res = generate.merge_generate(desire, div=div, merge=merge)
+            fail_s = final_dic
             gen_method = f"{div}-{merge}"
         
-        # 处理结果
         if res:
             filepath = available_path()
             save_json(final_dic, filepath)
@@ -53,7 +55,7 @@ def handle_generation():
             return jsonify({
                 "status": "fail", 
                 "path": None,
-                "message": "Failed to generate model"
+                "message": fail_s
             }), 500
             
     except Exception as e:
@@ -62,5 +64,15 @@ def handle_generation():
             "message": f"An unexpected error occurred: {str(e)}"
         }), 500
 
+@app.route('/outputs/<filename>')
+def get_generated_file(filename):
+    try:
+        return send_from_directory(OUTPUT_FOLDER, filename)
+    except FileNotFoundError:
+        return jsonify({"status": "error", "message": "File not found"}), 404
+
 if __name__ == "__main__":
+    # 确保输出目录存在
+    if not os.path.exists(OUTPUT_FOLDER):
+        os.makedirs(OUTPUT_FOLDER)
     app.run(debug=True, host='0.0.0.0', port=5000)

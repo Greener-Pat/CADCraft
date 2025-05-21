@@ -265,6 +265,8 @@ export class SceneManager {
     renderFromJson(data) {
         updateStatus('清除现有模型，开始渲染');
         this.clearCADObjects();
+        this.renderer.objectPartMap.clear();
+        this.renderer.objectInitPosition.clear();
         
         // 检测JSON格式
         if (data.assembly && data.assembly.components) {
@@ -433,8 +435,8 @@ export class SceneManager {
             }
             
             // 保存组件ID和其他数据
-            mesh.userData.componentId = componentId;
-            mesh.userData.type = 'brep';
+            this.renderer.objectPartMap.set(mesh.uuid, componentId);
+            this.renderer.objectInitPosition.set(mesh.uuid, transform.translation);
             
             // 应用变换
             this.applyTransform(mesh, transform);
@@ -478,7 +480,36 @@ export class SceneManager {
             mesh.rotation.z += rz;
         }
 
-        // console.log('applytranform\'s mesh rotation is ', mesh.rotation);
+    }
 
+    // 添加到SceneManager类
+    saveCurrentCameraState() {
+    if (!this.camera || !this.controls) return null;
+    
+    return {
+        position: this.camera.position.clone(),
+        target: this.controls.target.clone(),
+        quaternion: this.camera.quaternion.clone(),
+        zoom: this.controls.zoom, 
+        fov: this.camera.fov
+    };
+    }
+
+    restoreCameraState(state) {
+    if (!state || !this.camera || !this.controls) return;
+    
+    this.camera.position.copy(state.position);
+    this.camera.quaternion.copy(state.quaternion);
+    this.camera.fov = state.fov;
+    this.camera.updateProjectionMatrix();
+    
+    this.controls.target.copy(state.target);
+    
+    if (typeof this.controls.zoom !== 'undefined') {
+        this.controls.zoom = state.zoom;
+    }
+    
+    this.controls.update();
+    this.render();
     }
 }

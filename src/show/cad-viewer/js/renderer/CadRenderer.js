@@ -2,6 +2,7 @@ import { SceneManager } from './SceneManager.js';
 import { ControlsManager } from './ControlsManager.js';
 import { SelectionManager } from './SelectionManager.js';
 import { EventHandler } from './EventHandler.js';
+import { JsonEditor } from '../jsonEditor.js';
 
 export class CadRenderer {
     constructor(containerId) {
@@ -9,10 +10,15 @@ export class CadRenderer {
         this.container = document.getElementById(containerId);
         
         // 初始化各个管理器
+        this.jsonEditor = new JsonEditor();
+        this.jsonEditor.setRenderer(this);
         this.sceneManager = new SceneManager(this);
-        this.controlsManager = new ControlsManager(this);
+        this.controlsManager = new ControlsManager(this, this.jsonEditor);
         this.selectionManager = new SelectionManager(this);
         this.eventHandler = new EventHandler(this);
+
+        this.objectPartMap = new Map();
+        this.objectInitPosition = new Map();
         
         // 配置属性和限制
         this.gridConfig = {
@@ -120,5 +126,39 @@ export class CadRenderer {
             updateStatus('B-rep模型渲染失败: ' + error.message);
             return false;
         }
+    }
+
+    
+    // 通过对象查找partId的辅助方法
+    getPartIdFromObject(object) {
+        if (!object) return null;
+        
+        // 直接从对象的userData查找
+        if (object.userData && object.userData.partId) {
+            return object.userData.partId;
+        }
+        
+        // 从映射表中查找
+        if (this.objectPartMap.has(object.uuid)) {
+            return this.objectPartMap.get(object.uuid);
+        }
+        
+        // 递归查找父对象
+        if (object.parent) {
+            return this.getPartIdFromObject(object.parent);
+        }
+        
+        return null;
+    }
+
+    getInitialPosition(object) {
+        if (object && this.objectInitPosition.has(object.uuid)) {
+            return this.objectInitPosition.get(object.uuid);
+        }
+        // 递归查找父对象
+        if (object.parent) {
+            return this.getInitialPosition(object.parent);
+        }
+        return null;
     }
 }

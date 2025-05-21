@@ -798,7 +798,7 @@ body.dark-theme .CodeMirror {
 
 .status-message {
     margin-top: 5px;
-    font-size: 12px;
+    font-size: 10px;
     height: 20px;
     padding: 2px 5px;
     transition: all 0.3s ease;
@@ -809,7 +809,7 @@ body.dark-theme .CodeMirror {
 }
 
 .status-message.success {
-    color: var(--success-color, #2ecc71);
+    color: var(--success-color, hsl(145, 63%, 49%));
 }
 
 .editor-controls {
