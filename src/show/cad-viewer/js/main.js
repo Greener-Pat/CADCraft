@@ -1718,6 +1718,8 @@ const sidebarRating = {
                 if (this.autoTimerEnabled) {
                     this.startTimer();
                 }
+
+                this.updateModelInfo(jsonData);
                 
                 updateStatus(`正在评分: ${fileInfo.path}`);
             } catch (jsonError) {
