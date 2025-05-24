@@ -1,0 +1,45 @@
+{
+    "final_name": "Sphere",
+    "final_shape": "A perfectly smooth spherical surface, with no edges or flat surfaces. From any angle, it appears as a perfect circle, similar to the geometric shape of a ping pong ball or basketball.",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler_Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation_Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 1.0
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 2.0,
+                "extrude_depth_opposite_normal": 2.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Sphere",
+                "shape": "A perfectly smooth spherical surface, with no edges or flat surfaces. From any angle, it appears as a perfect circle, similar to the geometric shape of a ping pong ball or basketball.",
+                "diameter": 2.0,
+                "radius": 1.0
+            }
+        }
+    }
+}

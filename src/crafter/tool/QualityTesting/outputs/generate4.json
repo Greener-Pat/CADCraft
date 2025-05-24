@@ -1,0 +1,94 @@
+{
+    "final_name": "Flat Disk",
+    "final_shape": "A flat circular disk with a small hole in the center and smooth edges. The diameter and thickness are consistent, similar to a coin or disk.",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 0.5
+                        },
+                        "line_1": {
+                            "Start Point": [
+                                0.5,
+                                0.0
+                            ],
+                            "End Point": [
+                                0.5,
+                                -0.5
+                            ]
+                        },
+                        "line_2": {
+                            "Start Point": [
+                                0.5,
+                                -0.5
+                            ],
+                            "End Point": [
+                                -0.5,
+                                -0.5
+                            ]
+                        },
+                        "line_3": {
+                            "Start Point": [
+                                -0.5,
+                                -0.5
+                            ],
+                            "End Point": [
+                                -0.5,
+                                0.5
+                            ]
+                        },
+                        "line_4": {
+                            "Start Point": [
+                                -0.5,
+                                0.5
+                            ],
+                            "End Point": [
+                                0.5,
+                                0.5
+                            ]
+                        }
+                    },
+                    "loop_2": {
+                        "circle_2": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 0.25
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 0.1,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Flat Disk",
+                "shape": "A flat circular disk with a small hole in the center and smooth edges. The diameter and thickness are consistent, similar to a coin or disk.",
+                "diameter": 1.0,
+                "thickness": 0.1
+            }
+        }
+    }
+}

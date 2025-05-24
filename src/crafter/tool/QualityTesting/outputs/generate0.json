@@ -1,0 +1,144 @@
+{
+    "final_name": "FlatTorus",
+    "final_shape": "A flat toroidal object with an outer diameter of 120mm, an inner diameter of 60mm, and a thickness of 10mm. Equally spaced around the circumference are 6 bolt holes with a diameter of 8mm.",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler_Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation_Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "arc_1": {
+                            "Start_Point": [
+                                0.0,
+                                0.0
+                            ],
+                            "Mid_Point": [
+                                60.0,
+                                0.0
+                            ],
+                            "End_Point": [
+                                120.0,
+                                0.0
+                            ]
+                        },
+                        "line_1": {
+                            "Start_Point": [
+                                120.0,
+                                0.0
+                            ],
+                            "End_Point": [
+                                120.0,
+                                -10.0
+                            ]
+                        },
+                        "arc_2": {
+                            "Start_Point": [
+                                120.0,
+                                -10.0
+                            ],
+                            "Mid_Point": [
+                                60.0,
+                                -10.0
+                            ],
+                            "End_Point": [
+                                0.0,
+                                -10.0
+                            ]
+                        },
+                        "line_2": {
+                            "Start_Point": [
+                                0.0,
+                                -10.0
+                            ],
+                            "End_Point": [
+                                0.0,
+                                0.0
+                            ]
+                        }
+                    },
+                    "loop_2": {
+                        "arc_3": {
+                            "Start_Point": [
+                                0.0,
+                                -5.0
+                            ],
+                            "Mid_Point": [
+                                30.0,
+                                -5.0
+                            ],
+                            "End_Point": [
+                                60.0,
+                                -5.0
+                            ]
+                        },
+                        "line_3": {
+                            "Start_Point": [
+                                60.0,
+                                -5.0
+                            ],
+                            "End_Point": [
+                                60.0,
+                                -5.0
+                            ]
+                        },
+                        "circle_1": {
+                            "Center": [
+                                60.0,
+                                -5.0
+                            ],
+                            "Radius": 4.0
+                        },
+                        "line_4": {
+                            "Start_Point": [
+                                60.0,
+                                -5.0
+                            ],
+                            "End_Point": [
+                                60.0,
+                                -5.0
+                            ]
+                        },
+                        "arc_4": {
+                            "Start_Point": [
+                                60.0,
+                                -5.0
+                            ],
+                            "Mid_Point": [
+                                30.0,
+                                -5.0
+                            ],
+                            "End_Point": [
+                                0.0,
+                                -5.0
+                            ]
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 10.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "FlatTorus",
+                "shape": "A flat toroidal object with an outer diameter of 120mm, an inner diameter of 60mm, and a thickness of 10mm. Equally spaced around the circumference are 6 bolt holes with a diameter of 8mm.",
+                "length": 120.0,
+                "width": 120.0,
+                "height": 10.0
+            }
+        }
+    }
+}

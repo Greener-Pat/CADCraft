@@ -1,0 +1,46 @@
+{
+    "final_name": "Can-like Cylinder",
+    "final_shape": "A vertical cylindrical object with parallel circular top and bottom surfaces, smooth sides, and a height-to-diameter ratio similar to a can.",
+    "parts": {
+        "part_1": {
+            "coordinate_system": {
+                "Euler Angles": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Translation Vector": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "sketch": {
+                "face_1": {
+                    "loop_1": {
+                        "circle_1": {
+                            "Center": [
+                                0.0,
+                                0.0
+                            ],
+                            "Radius": 1.0
+                        }
+                    }
+                }
+            },
+            "extrusion": {
+                "extrude_depth_towards_normal": 2.0,
+                "extrude_depth_opposite_normal": 0.0,
+                "sketch_scale": 1.0,
+                "operation": "NewBodyFeatureOperation"
+            },
+            "description": {
+                "name": "Can-like Cylinder",
+                "shape": "A vertical cylindrical object with parallel circular top and bottom surfaces, smooth sides, and a height-to-diameter ratio similar to a can.",
+                "length": 2.0,
+                "width": 2.0,
+                "height": 2.0
+            }
+        }
+    }
+}

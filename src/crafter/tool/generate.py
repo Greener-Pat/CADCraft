@@ -118,7 +118,7 @@ def component_prefab(type, params):
 ## Merge
 
 def get_shape(obj_dic):
-	if 'lenght' in obj_dic['description']:
+	if 'length' in obj_dic['description']:
 		length = obj_dic['description']['length']
 		width = obj_dic['description']['width']
 	else:

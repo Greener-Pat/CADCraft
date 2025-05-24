@@ -39,8 +39,7 @@ def json_generate(prompt, model_call=kimi, limit=3, save=True):
 		else:
 			count += 1
 			print("Go on...")
-			print(gene_s)
-			prompt = "继续生成"
+			prompt = "继续生成，输出完整的json文件"
 
 	print("Fail")
 	failpath = available_path("../fail/")
